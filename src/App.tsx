@@ -1,11 +1,11 @@
 import { Suspense, useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
-import { AuthProvider, useAuth } from './components/auth/auth-context';
+import { AuthProvider, useAuth } from './hooks/use-auth';
 import { Routes } from './routes';
-import LoginPage from './pages/auth/login';
+import LoginPage from './pages/auth/page';
 
-const ErrorFallback = ({ error, resetErrorBoundary }) => (
+const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) => (
   <div className="flex flex-col items-center justify-center min-h-screen p-4">
     <h1 className="text-2xl font-bold mb-4">エラーが発生しました</h1>
     <pre className="text-red-500 mb-4">{error.message}</pre>
@@ -58,7 +58,7 @@ const UserMenu = () => {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center space-x-2"
       >
-        <span>{user?.name}</span>
+        <span>{user?.username}</span>
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
