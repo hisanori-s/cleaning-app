@@ -1,15 +1,9 @@
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
-import { useAuth } from './hooks/useAuth';
-import LoginPage from './components/auth/login-page';
-import RoomListPage from './components/rooms/room-list-page';
-import RoomDetailPage from './components/rooms/room-detail-page';
-import ReportFormPage from './components/reports/report-form-page';
-import ReportCompletePage from './components/reports/report-complete-page';
-
-const PrivateRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
-};
+import { LoginPage } from './components/auth/login-page';
+import { RoomListPage } from './components/rooms/room-list-page';
+import { RoomDetailPage } from './components/rooms/room-detail-page';
+import { ReportFormPage } from './components/reports/report-form-page';
+import { ReportCompletePage } from './components/reports/report-complete-page';
 
 const routes = createBrowserRouter([
   {
@@ -22,35 +16,19 @@ const routes = createBrowserRouter([
   },
   {
     path: '/rooms',
-    element: (
-      <PrivateRoute>
-        <RoomListPage />
-      </PrivateRoute>
-    ),
+    element: <RoomListPage />,
   },
   {
     path: '/rooms/:roomId',
-    element: (
-      <PrivateRoute>
-        <RoomDetailPage />
-      </PrivateRoute>
-    ),
+    element: <RoomDetailPage />,
   },
   {
     path: '/rooms/:roomId/report',
-    element: (
-      <PrivateRoute>
-        <ReportFormPage />
-      </PrivateRoute>
-    ),
+    element: <ReportFormPage />,
   },
   {
     path: '/report-complete',
-    element: (
-      <PrivateRoute>
-        <ReportCompletePage />
-      </PrivateRoute>
-    ),
+    element: <ReportCompletePage />,
   },
   {
     path: '*',
