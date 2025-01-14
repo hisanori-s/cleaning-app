@@ -1,61 +1,34 @@
 import * as React from "react"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 
-interface CardProps {
-  title?: string
-  description?: string
-  children?: React.ReactNode
-  footer?: React.ReactNode
-  className?: string
+export interface CardProps {
+  className?: string;
+  children?: React.ReactNode;
 }
 
-export function CustomCard({
-  title,
-  description,
-  children,
-  footer,
-  className,
-}: CardProps) {
+export function Card({ className, children }: CardProps) {
   return (
-    <Card className={className}>
-      {(title || description) && (
-        <CardHeader>
-          {title && <CardTitle>{title}</CardTitle>}
-          {description && <CardDescription>{description}</CardDescription>}
-        </CardHeader>
-      )}
-      {children && <CardContent>{children}</CardContent>}
-      {footer && <CardFooter>{footer}</CardFooter>}
-    </Card>
-  )
+    <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className || ''}`}>
+      {children}
+    </div>
+  );
 }
 
-export function CardWithAction({
-  title,
-  description,
-  children,
-  actionComponent,
-  className,
-}: CardProps & { actionComponent?: React.ReactNode }) {
-  return (
-    <Card className={className}>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            {title && <CardTitle>{title}</CardTitle>}
-            {description && <CardDescription>{description}</CardDescription>}
-          </div>
-          {actionComponent && <div>{actionComponent}</div>}
-        </div>
-      </CardHeader>
-      {children && <CardContent>{children}</CardContent>}
-    </Card>
-  )
+export function CardHeader({ className, children }: CardProps) {
+  return <div className={`flex flex-col space-y-1.5 p-6 ${className || ''}`}>{children}</div>;
+}
+
+export function CardTitle({ className, children }: CardProps) {
+  return <h3 className={`text-2xl font-semibold leading-none tracking-tight ${className || ''}`}>{children}</h3>;
+}
+
+export function CardDescription({ className, children }: CardProps) {
+  return <p className={`text-sm text-muted-foreground ${className || ''}`}>{children}</p>;
+}
+
+export function CardContent({ className, children }: CardProps) {
+  return <div className={`p-6 pt-0 ${className || ''}`}>{children}</div>;
+}
+
+export function CardFooter({ className, children }: CardProps) {
+  return <div className={`flex items-center p-6 pt-0 ${className || ''}`}>{children}</div>;
 }

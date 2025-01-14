@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 
-export const LoginPage = () => {
+export default function LoginPage() {
   const navigate = useNavigate();
 
   // 開発中は即座にログイン成功とする
@@ -28,4 +28,4 @@ export const LoginPage = () => {
       </div>
     </div>
   );
-};
+}

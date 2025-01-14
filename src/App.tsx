@@ -2,7 +2,7 @@ import React, { Suspense, useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
 import { AuthProvider, useAuth } from './contexts/auth';
-import Routes from './routes';
+import { Routes } from './routes';
 import LoginPage from './components/auth/login-page';
 
 const ErrorFallback = ({ error, resetErrorBoundary }) => (

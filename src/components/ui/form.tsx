@@ -1,72 +1,54 @@
 import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
 
-const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-});
-
-export type FormData = z.infer<typeof formSchema>;
-
-interface FormProps {
-  onSubmit: (data: FormData) => void;
-  defaultValues?: Partial<FormData>;
+export interface FormProps extends React.FormHTMLAttributes<HTMLFormElement> {
   children: React.ReactNode;
 }
 
-export function FormComponent({
-  onSubmit,
-  defaultValues,
-  children
-}: FormProps) {
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: defaultValues || {
-      email: '',
-      password: '',
-    },
-  });
+export function Form({ children, ...props }: FormProps) {
+  return <form {...props}>{children}</form>;
+}
 
+export interface FormFieldProps {
+  name: string;
+  children: React.ReactNode;
+}
+
+export function FormField({ name, children }: FormFieldProps) {
+  return <div className="space-y-2" data-field-name={name}>{children}</div>;
+}
+
+export interface FormItemProps {
+  children: React.ReactNode;
+}
+
+export function FormItem({ children }: FormItemProps) {
+  return <div className="space-y-1">{children}</div>;
+}
+
+export interface FormLabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
+  children: React.ReactNode;
+}
+
+export function FormLabel({ children, ...props }: FormLabelProps) {
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {children}
-      </form>
-    </Form>
+    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" {...props}>
+      {children}
+    </label>
   );
 }
 
-export function FormFieldWrapper({
-  name,
-  label,
-  children
-}: {
-  name: keyof FormData;
-  label: string;
+export interface FormControlProps {
   children: React.ReactNode;
-}) {
-  return (
-    <FormField
-      name={name}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>{label}</FormLabel>
-          <FormControl>
-            {React.cloneElement(children as React.ReactElement, { ...field })}
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
+}
+
+export function FormControl({ children }: FormControlProps) {
+  return <div className="relative">{children}</div>;
+}
+
+export interface FormMessageProps {
+  children: React.ReactNode;
+}
+
+export function FormMessage({ children }: FormMessageProps) {
+  return <p className="text-sm font-medium text-destructive">{children}</p>;
 }
