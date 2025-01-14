@@ -1,12 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
+import { useAuth } from '../../components/auth/auth-context';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   // 開発中は即座にログイン成功とする
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    login();  // 認証状態を更新
     navigate('/');
   };
 
