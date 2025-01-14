@@ -1,6 +1,6 @@
-import { User, Room, Report, ApiResponse } from '../types';
+import { User, Room, CleaningReport, ApiResponse } from '../types';
 
-const API_BASE_URL = 'https://api.example.com/wp-json/v1';
+const API_BASE_URL = import.meta.env.VITE_WP_API_BASE_URL;
 
 interface LoginCredentials {
   username: string;
@@ -49,13 +49,13 @@ class WordPressApiClient {
     return this.handleResponse<Room>(response);
   }
 
-  async submitReport(report: Omit<Report, 'id'>): Promise<ApiResponse<Report>> {
+  async submitReport(report: Omit<CleaningReport, 'id'>): Promise<ApiResponse<CleaningReport>> {
     const response = await fetch(`${API_BASE_URL}/reports`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(report),
     });
-    return this.handleResponse<Report>(response);
+    return this.handleResponse<CleaningReport>(response);
   }
 
   async uploadImage(file: File): Promise<ApiResponse<{ url: string }>> {
@@ -88,4 +88,16 @@ class WordPressApiClient {
   }
 }
 
-export const wordPressApi = new WordPressApiClient();
+const client = new WordPressApiClient();
+
+// APIメソッドのエクスポート
+export const login = (credentials: LoginCredentials) => client.login(credentials);
+export const logout = () => client.logout();
+export const getRooms = () => client.getRooms();
+export const getRoomDetails = (id: number) => client.getRoom(id);
+export const uploadReport = (report: Omit<CleaningReport, 'id'>) => client.submitReport(report);
+export const uploadImage = (file: File) => client.uploadImage(file);
+export const getRoomCleaningHistory = async (roomId: number) => {
+  // 履歴取得のメソッドを実装
+  return [];
+};
