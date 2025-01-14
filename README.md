@@ -18,20 +18,7 @@
 - 画像アップロード機能
 
 ## プロジェクト構造
-
-```
-src/
-  components/
-    ui/            # shadcn/uiコンポーネント
-    auth/          # 認証関連
-    rooms/         # 物件管理
-    reports/       # 報告書
-  api/
-    wordpress.ts   # WordPress REST API クライアント
-  types/          # 共通型定義
-  app.tsx         # メインアプリケーション
-  routes.tsx      # ルーティング設定
-```
+[構造図](doc/architecture.md)
 
 ## 開発ガイドライン
 
