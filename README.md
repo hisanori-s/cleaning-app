@@ -1,50 +1,79 @@
-# React + TypeScript + Vite
+# シェアハウス清掃管理システム
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+シンプルで使いやすいシェアハウス清掃業者向けの管理システムです。清掃担当者が担当物件の確認、清掃報告を効率的に行えます。
 
-Currently, two official plugins are available:
+## 技術スタック
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- フロントエンド: React 18 + Vite
+- UIライブラリ: shadcn/ui
+- バックエンド: WordPress REST API
+- 開発環境: TypeScript + ESLint
 
-## Expanding the ESLint configuration
+## 主な機能
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- 清掃担当者向けログイン機能
+- 担当物件一覧表示
+- 物件詳細情報の閲覧
+- 清掃報告書の作成・送信
+- 画像アップロード機能
 
-- Configure the top-level `parserOptions` property like this:
+## プロジェクト構造
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```
+src/
+  components/
+    ui/            # shadcn/uiコンポーネント
+    auth/          # 認証関連
+    rooms/         # 物件管理
+    reports/       # 報告書
+  api/
+    wordpress.ts   # WordPress REST API クライアント
+  types/          # 共通型定義
+  app.tsx         # メインアプリケーション
+  routes.tsx      # ルーティング設定
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## 開発ガイドライン
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+### コンポーネント設計
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+- 機能単位での明確な分割
+- シンプルで保守性の高い構造
+- 直感的なファイル配置
+
+### 命名規則
+
+- ディレクトリ名: ケバブケース（例：`room-list`）
+- コンポーネント: パスカルケース（例：`RoomList.tsx`）
+- 型定義: パスカルケース（例：`RoomType.ts`）
+
+### 依存関係
+
 ```
+ui/ → common/ → 各機能ディレクトリ
+```
+
+## セットアップ
+
+1. 依存パッケージのインストール:
+```bash
+npm install
+```
+
+2. 開発サーバーの起動:
+```bash
+npm run dev
+```
+
+3. ビルド:
+```bash
+npm run build
+```
+
+## ESLint設定
+
+TypeScriptの型チェックを含む厳密なルールセットを使用しています。設定の詳細は`eslint.config.js`を参照してください。
+
+## ライセンス
+
+このプロジェクトはプライベートソフトウェアです。無断での使用・複製・改変・配布を禁じます。
