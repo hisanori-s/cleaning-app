@@ -13,54 +13,32 @@ src/
 ├── components/            # 機能コンポーネント
 │   ├── dashboard/        # ダッシュボード機能
 │   │   ├── message-box/  # メッセージ表示
-│   │   │   ├── __tests__/
-│   │   │   │   └── message-box.test.tsx
-│   │   │   ├── message-box.tsx
-│   │   │   └── types.ts
-│   │   │
+│   │   │   └── message-box.tsx
 │   │   └── room-list-box/  # 部屋一覧表示
-│   │       ├── __tests__/
-│   │       │   └── room-list-box.test.tsx
-│   │       ├── room-list-box.tsx
-│   │       └── types.ts
+│   │       └── room-list-box.tsx
 │   │
 │   ├── room-detail/      # 部屋詳細機能
 │   │   ├── property-info-box/  # 物件情報
-│   │   │   ├── __tests__/
-│   │   │   │   └── property-info-box.test.tsx
-│   │   │   ├── property-info-box.tsx
-│   │   │   └── types.ts
-│   │   │
+│   │   │   └── property-info-box.tsx
 │   │   └── room-info-box/     # 部屋情報
-│   │       ├── __tests__/
-│   │       │   └── room-info-box.test.tsx
-│   │       ├── room-info-box.tsx
-│   │       └── types.ts
+│   │       └── room-info-box.tsx
 │   │
 │   ├── report/           # レポート機能
 │   │   └── report-form-box/   # レポートフォーム
-│   │       ├── __tests__/
-│   │       │   └── report-form-box.test.tsx
 │   │       ├── report-form-box.tsx
 │   │       ├── report-form-box-checklist.tsx
-│   │       ├── report-form-box-image.tsx
-│   │       └── types.ts
+│   │       └── report-form-box-image.tsx
 │   │
 │   └── ui/              # 共通UIコンポーネント
-│       ├── alert/
-│       │   ├── alert.tsx
-│       │   └── types.ts
-│       ├── button/
-│       │   ├── button.tsx
-│       │   └── types.ts
-│       ├── card/
-│       │   ├── card.tsx
-│       │   └── types.ts
-│       └── form/
-│           ├── checkbox.tsx
-│           ├── input.tsx
-│           ├── textarea.tsx
-│           └── types.ts
+│       ├── alert.tsx
+│       ├── button.tsx
+│       ├── card.tsx
+│       ├── checkbox.tsx
+│       ├── dropdown-menu.tsx
+│       ├── form.tsx
+│       ├── input.tsx
+│       ├── skeleton.tsx
+│       └── textarea.tsx
 │
 ├── hooks/               # カスタムフック
 │   ├── use-auth.ts
@@ -86,10 +64,7 @@ src/
 │               └── page.tsx # レポート作成
 │
 ├── types/             # 共通型定義
-│   ├── api.ts        # API関連の型
-│   ├── auth.ts       # 認証関連の型
-│   ├── room.ts       # 部屋関連の型
-│   └── report.ts     # レポート関連の型
+│   └── index.ts      # 型定義
 │
 ├── app.tsx           # アプリケーションのルート
 ├── routes.tsx        # ルーティング設定
@@ -150,18 +125,6 @@ src/
   - データフェッチ
   - キャッシュ管理
   - エラー処理
-
-### 型定義
-- `api.ts`: API関連の型定義
-- `auth.ts`: 認証関連の型定義
-- `room.ts`: 部屋関連の型定義
-- `report.ts`: レポート関連の型定義
-
-## テスト構成
-各機能コンポーネントに対して:
-- ユニットテスト
-- インテグレーションテスト
-- スナップショットテスト
 
 ## スタイリング
 - コンポーネントレベルのスタイル
