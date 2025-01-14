@@ -160,15 +160,15 @@ src/
 - [x] `components/dashboard/room-list-box/` の作成と実装
 
 2. 部屋詳細機能
-- [ ] 物件情報の依存関係確認
-- [ ] `components/room-detail/property-info-box/` の作成と実装
-- [ ] 部屋情報の依存関係確認
-- [ ] `components/room-detail/room-info-box/` の作成と実装
+- [x] 物件情報の依存関係確認
+- [x] `components/room-detail/property-info-box/` の作成と実装
+- [x] 部屋情報の依存関係確認
+- [x] `components/room-detail/room-info-box/` の作成と実装
 
 3. レポート機能
-- [ ] レポートフォームの依存関係確認
-- [ ] `components/report/report-form-box/` の作成
-- [ ] チェックリストとイメージアップロード機能の実装
+- [x] レポートフォームの依存関係確認
+- [x] `components/report/report-form-box/` の作成
+- [x] チェックリストとイメージアップロード機能の実装
 
 ### Phase 5: 依存関係の更新
 1. import文の更新
