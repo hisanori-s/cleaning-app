@@ -1,56 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../../../components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui/card';
+import { PropertyInfoBox } from '../../../components/room-detail/property-info-box/property-info-box';
+import { RoomInfoBox } from '../../../components/room-detail/room-info-box/room-info-box';
 import { getRoomDetails, getRoomCleaningHistory } from '../../../api/wordpress';
 import type { Room, CleaningReport } from '../../../types';
-
-// 部屋情報コンポーネント
-function RoomInfo({ room }: { room: Room }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{room.name}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="font-semibold">階:</p>
-            <p>{room.floor}</p>
-          </div>
-          <div>
-            <p className="font-semibold">状態:</p>
-            <p>{room.status === 'clean' ? '清掃済み' : room.status === 'dirty' ? '要清掃' : '清掃中'}</p>
-          </div>
-          <div>
-            <p className="font-semibold">最終清掃:</p>
-            <p>{room.lastCleaned}</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
 
 // 清掃履歴コンポーネント
 function CleaningHistory({ history }: { history: CleaningReport[] }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>清掃履歴</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {history.map((entry) => (
-            <div key={entry.id} className="border-b pb-4">
-              <p className="font-semibold">{entry.date}</p>
-              <p>清掃者: {entry.cleanerId}</p>
-              <p>{entry.comments}</p>
-            </div>
-          ))}
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold">清掃履歴</h2>
+      {history.map((entry) => (
+        <div key={entry.id} className="border-b pb-4">
+          <p className="font-semibold">{entry.date}</p>
+          <p>清掃者: {entry.cleanerId}</p>
+          <p>{entry.comments}</p>
         </div>
-      </CardContent>
-    </Card>
+      ))}
+    </div>
   );
 }
 
@@ -60,7 +28,7 @@ export default function RoomDetailPage() {
   const navigate = useNavigate();
   const [room, setRoom] = useState<Room | null>(null);
   const [history, setHistory] = useState<CleaningReport[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchRoomData = async () => {
@@ -79,7 +47,7 @@ export default function RoomDetailPage() {
       } catch (error) {
         console.error('Failed to fetch room data:', error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -108,7 +76,8 @@ export default function RoomDetailPage() {
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <RoomInfo room={room} />
+      <PropertyInfoBox room={room} />
+      <RoomInfoBox room={room} />
       <CleaningHistory history={history} />
 
       <div className="flex justify-end space-x-4">
