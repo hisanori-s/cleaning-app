@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Button } from '../ui/button';
+import { Button } from '../../components/ui/button';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -7,7 +7,7 @@ export default function LoginPage() {
   // 開発中は即座にログイン成功とする
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/rooms');
+    navigate('/');
   };
 
   return (
@@ -28,4 +28,4 @@ export default function LoginPage() {
       </div>
     </div>
   );
-}
+} 

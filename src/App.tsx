@@ -3,7 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
 import { AuthProvider, useAuth } from './contexts/auth';
 import { Routes } from './routes';
-import LoginPage from './components/auth/login-page';
+import LoginPage from './pages/auth/login';
 
 const ErrorFallback = ({ error, resetErrorBoundary }) => (
   <div className="flex flex-col items-center justify-center min-h-screen p-4">

@@ -1,17 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Form } from '../ui/form';
-import { Button } from '../ui/button';
-import { uploadReport, uploadImage } from '../../api/wordpress';
-import type { CleaningReport } from '../../types';
-
-const CLEANING_ITEMS = [
-  { id: 'floor', label: '床清掃' },
-  { id: 'bathroom', label: '浴室清掃' },
-  { id: 'kitchen', label: 'キッチン清掃' },
-  { id: 'toilet', label: 'トイレ清掃' },
-  { id: 'common', label: '共用部清掃' },
-];
+import { Form } from '../../../components/ui/form';
+import { Button } from '../../../components/ui/button';
+import { CleaningChecklist } from '../../../components/reports/form/cleaning-checklist';
+import { ImageUpload } from '../../../components/reports/form/image-upload';
+import { uploadReport, uploadImage } from '../../../api/wordpress';
+import type { CleaningReport } from '../../../types';
 
 export default function ReportFormPage() {
   const { roomId } = useParams();
@@ -20,12 +14,6 @@ export default function ReportFormPage() {
   const [images, setImages] = useState<File[]>([]);
   const [checklist, setChecklist] = useState<Record<string, boolean>>({});
   const [comments, setComments] = useState('');
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setImages(Array.from(e.target.files));
-    }
-  };
 
   const handleChecklistChange = (itemId: string, checked: boolean) => {
     setChecklist(prev => ({ ...prev, [itemId]: checked }));
@@ -80,21 +68,10 @@ export default function ReportFormPage() {
       
       <Form onSubmit={handleSubmit}>
         <div className="space-y-6">
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">清掃チェックリスト</h2>
-            {CLEANING_ITEMS.map(item => (
-              <div key={item.id} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  name={item.id}
-                  checked={checklist[item.id] || false}
-                  onChange={(e) => handleChecklistChange(item.id, e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                />
-                <label>{item.label}</label>
-              </div>
-            ))}
-          </div>
+          <CleaningChecklist
+            checklist={checklist}
+            onChange={handleChecklistChange}
+          />
 
           <div className="space-y-2">
             <h2 className="text-lg font-semibold">コメント</h2>
@@ -108,17 +85,7 @@ export default function ReportFormPage() {
             />
           </div>
 
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold">画像アップロード</h2>
-            <input
-              type="file"
-              name="images"
-              multiple
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="w-full cursor-pointer rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-            />
-          </div>
+          <ImageUpload onChange={setImages} />
 
           <Button
             type="submit"
@@ -131,4 +98,4 @@ export default function ReportFormPage() {
       </Form>
     </div>
   );
-}
+} 

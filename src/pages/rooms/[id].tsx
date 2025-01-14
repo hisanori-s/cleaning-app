@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
-import { Button } from '../ui/button';
+import { Button } from '../../components/ui/button';
+import { RoomInfo } from '../../components/rooms/detail/room-info';
+import { CleaningHistory } from '../../components/rooms/detail/cleaning-history';
 import { getRoomDetails, getRoomCleaningHistory } from '../../api/wordpress';
 import type { Room, CleaningReport } from '../../types';
 
@@ -41,44 +42,8 @@ export default function RoomDetailPage() {
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{room.name}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="font-semibold">階:</p>
-              <p>{room.floor}</p>
-            </div>
-            <div>
-              <p className="font-semibold">状態:</p>
-              <p>{room.status === 'clean' ? '清掃済み' : room.status === 'dirty' ? '要清掃' : '清掃中'}</p>
-            </div>
-            <div>
-              <p className="font-semibold">最終清掃:</p>
-              <p>{room.lastCleaned}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>清掃履歴</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {history.map((entry) => (
-              <div key={entry.id} className="border-b pb-4">
-                <p className="font-semibold">{entry.date}</p>
-                <p>清掃者: {entry.cleanerId}</p>
-                <p>{entry.comments}</p>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <RoomInfo room={room} />
+      <CleaningHistory history={history} />
 
       <div className="flex justify-end space-x-4">
         <Button
@@ -95,4 +60,4 @@ export default function RoomDetailPage() {
       </div>
     </div>
   );
-}
+} 
