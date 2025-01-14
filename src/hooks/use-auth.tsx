@@ -1,5 +1,6 @@
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import type { User } from '../types/index';
+import { AUTH_CACHE, AUTH_API, AUTH_DEVELOPMENT } from '../constants/auth';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -24,6 +25,39 @@ const MOCK_API_AUTH_ENDPOINT = import.meta.env.VITE_MOCK_API_AUTH_ENDPOINT;
 const getApiUrl = (endpoint: string) => `${API_BASE_URL}/${API_NAMESPACE}${endpoint}`;
 const getMockApiUrl = (endpoint: string) => `${MOCK_API_BASE_URL}${endpoint}`;
 
+// キャッシュ操作のユーティリティ関数
+const getAuthCache = () => {
+  const cached = localStorage.getItem(AUTH_CACHE.KEY);
+  if (!cached) return null;
+
+  try {
+    const { data, timestamp } = JSON.parse(cached);
+    if (Date.now() - timestamp > AUTH_CACHE.DURATION) {
+      localStorage.removeItem(AUTH_CACHE.KEY);
+      return null;
+    }
+    return data;
+  } catch (error) {
+    console.error('Failed to parse auth cache:', error);
+    localStorage.removeItem(AUTH_CACHE.KEY);
+    return null;
+  }
+};
+
+const setAuthCache = (user: User) => {
+  localStorage.setItem(
+    AUTH_CACHE.KEY,
+    JSON.stringify({
+      data: user,
+      timestamp: Date.now(),
+    })
+  );
+};
+
+const clearAuthCache = () => {
+  localStorage.removeItem(AUTH_CACHE.KEY);
+};
+
 // 開発環境の判定
 const isDevelopment = import.meta.env.VITE_DEV_MODE === 'true';
 
@@ -34,29 +68,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // キャッシュからログイン状態を復元
   useEffect(() => {
-    const restoreAuth = () => {
-      const cached = localStorage.getItem('auth_user');
-      if (!cached) return;
-
-      try {
-        const { data, timestamp } = JSON.parse(cached);
-        const CACHE_DURATION = 1000 * 60 * 60 * 24; // 24時間
-
-        if (Date.now() - timestamp > CACHE_DURATION) {
-          localStorage.removeItem('auth_user');
-          return;
-        }
-
-        setIsAuthenticated(true);
-        setUser(data);
-        console.log('Restored auth state from cache:', data);
-      } catch (error) {
-        console.error('Failed to restore auth state:', error);
-        localStorage.removeItem('auth_user');
-      }
-    };
-
-    restoreAuth();
+    const cachedUser = getAuthCache();
+    if (cachedUser) {
+      setIsAuthenticated(true);
+      setUser(cachedUser);
+      console.log('Restored auth state from cache:', cachedUser);
+    }
   }, []);
 
   // 開発環境の場合、モックユーザーリストを取得
@@ -80,24 +97,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = async (loginId: string, password: string): Promise<boolean> => {
     try {
       if (isDevelopment) {
-        // 開発環境では、取得済みのモックユーザーリストで認証
         const user = mockUsers.find(u => u.login_id === loginId && u.password === password);
         if (user) {
           console.log('Development mode: User authenticated:', user);
           setIsAuthenticated(true);
           setUser(user);
-          // 認証成功時にキャッシュを更新
-          localStorage.setItem('auth_user', JSON.stringify({ 
-            data: user, 
-            timestamp: Date.now() 
-          }));
+          setAuthCache(user);
           return true;
         }
         console.log('Development mode: Authentication failed');
         return false;
       }
 
-      // 本番環境では、APIを使用
       console.log('Login attempt:', { loginId, password });
       console.log('API URL:', getApiUrl(AUTH_LOGIN_ENDPOINT));
 
@@ -117,6 +128,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.log('Login successful:', data.data);
         setIsAuthenticated(true);
         setUser(data.data);
+        setAuthCache(data.data);
         return true;
       }
 
@@ -131,6 +143,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = () => {
     setIsAuthenticated(false);
     setUser(null);
+    clearAuthCache();
   };
 
   const auth = {
