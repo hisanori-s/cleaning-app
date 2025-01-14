@@ -154,10 +154,10 @@ src/
 
 ### Phase 4: 機能コンポーネントの作成
 1. ダッシュボード機能
-- [ ] メッセージボックスの依存関係確認
-- [ ] `components/dashboard/message-box/` の作成と実装
-- [ ] 部屋一覧ボックスの依存関係確認
-- [ ] `components/dashboard/room-list-box/` の作成と実装
+- [x] メッセージボックスの依存関係確認
+- [x] `components/dashboard/message-box/` の作成と実装
+- [x] 部屋一覧ボックスの依存関係確認
+- [x] `components/dashboard/room-list-box/` の作成と実装
 
 2. 部屋詳細機能
 - [ ] 物件情報の依存関係確認

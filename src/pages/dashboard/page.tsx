@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
+import { MessageBox } from '../../components/dashboard/message-box/message-box';
+import { RoomListBox } from '../../components/dashboard/room-list-box/room-list-box';
 import { getRooms } from '../../api/wordpress';
 import type { Room } from '../../types';
 
@@ -30,13 +31,10 @@ export default function DashboardPage() {
     return (
       <div className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-6">ダッシュボード</h1>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center text-gray-600">
-              データを読み込んでいます...
-            </div>
-          </CardContent>
-        </Card>
+        <MessageBox
+          title="データ読み込み中"
+          message="データを読み込んでいます..."
+        />
       </div>
     );
   }
@@ -49,72 +47,35 @@ export default function DashboardPage() {
     <div className="container mx-auto p-4 space-y-6">
       <h1 className="text-2xl font-bold mb-6">ダッシュボード</h1>
 
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center space-y-2">
-            <h2 className="text-xl font-semibold">清掃管理システムへようこそ</h2>
-            <p className="text-gray-600">
-              このダッシュボードでは、担当する部屋の清掃状況を確認できます。
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <MessageBox
+        title="清掃管理システムへようこそ"
+        message="このダッシュボードでは、担当する部屋の清掃状況を確認できます。"
+      />
       
       {/* 状態概要 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-red-500">要清掃</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{dirtyRooms.length}</p>
-            <p className="text-sm text-gray-600">部屋</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-yellow-500">清掃中</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{inProgressRooms.length}</p>
-            <p className="text-sm text-gray-600">部屋</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-green-500">清掃済み</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{cleanRooms.length}</p>
-            <p className="text-sm text-gray-600">部屋</p>
-          </CardContent>
-        </Card>
+        <RoomListBox
+          title="要清掃"
+          rooms={dirtyRooms}
+          titleColor="text-red-500"
+        />
+        <RoomListBox
+          title="清掃中"
+          rooms={inProgressRooms}
+          titleColor="text-yellow-500"
+        />
+        <RoomListBox
+          title="清掃済み"
+          rooms={cleanRooms}
+          titleColor="text-green-500"
+        />
       </div>
 
       {/* 要清掃の部屋一覧 */}
-      {dirtyRooms.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>要清掃の部屋</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {dirtyRooms.map(room => (
-                <div
-                  key={room.id}
-                  className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer"
-                  onClick={() => navigate(`/rooms/${room.id}`)}
-                >
-                  <span>{room.name}</span>
-                  <span className="text-sm text-gray-600">最終清掃: {room.lastCleaned}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <RoomListBox
+        title="要清掃の部屋"
+        rooms={dirtyRooms}
+      />
 
       <div className="flex justify-end">
         <Button
