@@ -1,3 +1,4 @@
+import React, { ChangeEvent } from 'react';
 import { Input } from '../../ui/form/input';
 
 interface ReportFormImageProps {
@@ -5,7 +6,7 @@ interface ReportFormImageProps {
 }
 
 export function ReportFormImage({ onChange }: ReportFormImageProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       onChange(Array.from(e.target.files));
     }

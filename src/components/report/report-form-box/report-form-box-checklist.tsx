@@ -1,3 +1,4 @@
+import React from 'react';
 import { Checkbox } from '../../ui/form/checkbox';
 
 interface CleaningItem {
@@ -27,7 +28,7 @@ export function ReportFormChecklist({ checklist, onChange }: ReportFormChecklist
           <Checkbox
             id={item.id}
             checked={checklist[item.id] || false}
-            onCheckedChange={(checked) => onChange(item.id, checked as boolean)}
+            onCheckedChange={(checked: boolean) => onChange(item.id, checked)}
           />
           <label htmlFor={item.id} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             {item.label}

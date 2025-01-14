@@ -1,9 +1,16 @@
+import React, { useState, FormEvent } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../../ui/card';
 import { Button } from '../../ui/button';
 import { ReportFormChecklist } from './report-form-box-checklist';
 import { ReportFormImage } from './report-form-box-image';
 import { Textarea } from '../../ui/form/textarea';
-import type { CleaningReport } from '../../../types';
+
+export interface CleaningReport {
+  checklist: Record<string, boolean>;
+  images: File[];
+  comments: string;
+  date: string;
+}
 
 export interface ReportFormBoxProps {
   onSubmit: (report: Partial<CleaningReport>) => void;
@@ -11,11 +18,11 @@ export interface ReportFormBoxProps {
 }
 
 export function ReportFormBox({ onSubmit, isSubmitting = false }: ReportFormBoxProps) {
-  const [checklist, setChecklist] = React.useState<Record<string, boolean>>({});
-  const [images, setImages] = React.useState<File[]>([]);
-  const [comments, setComments] = React.useState('');
+  const [checklist, setChecklist] = useState<Record<string, boolean>>({});
+  const [images, setImages] = useState<File[]>([]);
+  const [comments, setComments] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     onSubmit({
       checklist,
@@ -34,7 +41,7 @@ export function ReportFormBox({ onSubmit, isSubmitting = false }: ReportFormBoxP
         <form onSubmit={handleSubmit} className="space-y-6">
           <ReportFormChecklist
             checklist={checklist}
-            onChange={(itemId, checked) => {
+            onChange={(itemId: string, checked: boolean) => {
               setChecklist(prev => ({ ...prev, [itemId]: checked }));
             }}
           />
@@ -47,7 +54,7 @@ export function ReportFormBox({ onSubmit, isSubmitting = false }: ReportFormBoxP
             <h2 className="text-lg font-semibold">コメント</h2>
             <Textarea
               value={comments}
-              onChange={(e) => setComments(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setComments(e.target.value)}
               placeholder="清掃に関する特記事項があれば入力してください"
               className="min-h-[100px]"
             />
