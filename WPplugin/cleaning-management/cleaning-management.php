@@ -3,7 +3,7 @@
  * Plugin Name: Cleaning Management API
  * Description: シェアハウス清掃管理システムのREST APIを提供するプラグイン
  * Version: 1.0.0
- * Author: Your Name
+ * Author: Sakurai
  * License: GPL v2 or later
  */
 
