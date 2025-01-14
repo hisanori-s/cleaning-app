@@ -1,7 +1,8 @@
-import React, { Suspense, useState } from 'react';
+import React from 'react';
+import { Suspense } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
-import { AuthProvider, useAuth } from './contexts/auth';
+import { AuthProvider, useAuth } from './components/auth/auth-context';
 import { Routes } from './routes';
 import LoginPage from './pages/auth/login';
 
