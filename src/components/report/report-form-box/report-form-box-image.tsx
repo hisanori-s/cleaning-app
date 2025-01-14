@@ -1,5 +1,5 @@
 import React, { ChangeEvent } from 'react';
-import { Input } from '../../ui/form/input';
+import { Input } from '../../ui/input';
 
 interface ReportFormImageProps {
   onChange: (files: File[]) => void;

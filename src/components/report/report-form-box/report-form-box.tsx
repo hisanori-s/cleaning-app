@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '../../ui/card';
 import { Button } from '../../ui/button';
 import { ReportFormChecklist } from './report-form-box-checklist';
 import { ReportFormImage } from './report-form-box-image';
-import { Textarea } from '../../ui/form/textarea';
+import { Textarea } from '../../ui/textarea';
 
 export interface CleaningReport {
   checklist: Record<string, boolean>;

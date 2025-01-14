@@ -1,5 +1,5 @@
 import React from 'react';
-import { Checkbox } from '../../ui/form/checkbox';
+import { Checkbox } from '../../ui/checkbox';
 
 interface CleaningItem {
   id: string;
