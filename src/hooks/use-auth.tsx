@@ -1,6 +1,6 @@
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import type { User } from '../types/index';
-import { AUTH_CACHE, AUTH_API, AUTH_DEVELOPMENT } from '../constants/auth';
+import { AUTH_CACHE, AUTH_API } from '../constants/auth';
 
 interface AuthContextType {
   isAuthenticated: boolean;

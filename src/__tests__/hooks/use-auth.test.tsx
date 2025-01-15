@@ -1,6 +1,8 @@
 import { renderHook, act } from '@testing-library/react';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
+import type { MockUser, MockAuthResponse } from '@/__tests__/mocks/types';
+import mockAuthData from '../mocks/api/auth.json';
 
 // モックストレージの実装
 const mockStorage: { [key: string]: string } = {};
@@ -16,22 +18,27 @@ Object.defineProperty(window, 'localStorage', {
   value: mockLocalStorage
 });
 
+// fetchのモック
+global.fetch = vi.fn().mockImplementation(() =>
+  Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve(mockAuthData)
+  })
+);
+
 // テスト用のラッパーコンポーネント
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <AuthProvider>{children}</AuthProvider>
 );
 
 describe('useAuth Hook', () => {
-  // テストユーザーの定義（モックデータと一致させる）
-  const TEST_USER = {
-    login_id: 'demo1',
-    password: '1234',
-    username: '清掃 太郎'
-  };
+  // テストユーザーの定義（auth.jsonから取得）
+  const TEST_USER = (mockAuthData as MockAuthResponse).mock_users[0];
 
   // 各テストの前にストレージをクリア
   beforeEach(() => {
     mockLocalStorage.clear();
+    vi.clearAllMocks();
   });
 
   // 初期状態のテスト
