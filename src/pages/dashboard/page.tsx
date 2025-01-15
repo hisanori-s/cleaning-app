@@ -1,39 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { MessageBox } from '@/components/dashboard/message-box/message-box';
 import { RoomListBox } from '@/components/dashboard/room-list-box/room-list-box';
-import type { Room } from '@/types/room';
+import type { Room, RoomListResponse } from '@/types/room';
+import mockData from '@/__tests__/mocks/api/properties-rooms.json';
 
-// 開発用モックデータ
-const mockRooms: Room[] = [
-  {
-    property_id: 1,
-    property_name: 'シェアハウスA',
-    room_number: '101',
-    vacancy_date: '2024-01-20',
-    cleaning_deadline: '2024-02-01',
-    status: 'urgent',
-  },
-  {
-    property_id: 1,
-    property_name: 'シェアハウスA',
-    room_number: '102',
-    vacancy_date: '2024-01-25',
-    cleaning_deadline: '2024-02-05',
-    status: 'normal',
-  },
-  {
-    property_id: 2,
-    property_name: 'シェアハウスB',
-    room_number: '201',
-    vacancy_date: '2024-01-15',
-    cleaning_deadline: '2024-01-30',
-    status: 'overdue',
-  },
-];
+// モックデータの型アサーション
+const mockRooms = (mockData as RoomListResponse).mock_rooms_list;
 
 export default function DashboardPage() {
-  const [rooms, setRooms] = useState<Room[]>(mockRooms);
-  const [isLoading, setIsLoading] = useState(false);
+  const [rooms] = useState<Room[]>(mockRooms);
+  const [isLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   if (isLoading) {
@@ -72,9 +48,10 @@ export default function DashboardPage() {
     );
   }
 
-  const urgentRooms = rooms.filter(room => room.status === 'urgent');
-  const normalRooms = rooms.filter(room => room.status === 'normal');
-  const overdueRooms = rooms.filter(room => room.status === 'overdue');
+  // ステータスごとの部屋のフィルタリング
+  const overdueRooms = rooms.filter(room => room.status['label-text'] === '期限超過');
+  const scheduledRooms = rooms.filter(room => room.status['label-text'] === '退去予定');
+  const completedRooms = rooms.filter(room => room.status['label-text'] === '退去済み');
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -88,21 +65,21 @@ export default function DashboardPage() {
       {/* 状態別の部屋一覧 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <RoomListBox
-          title="緊急清掃"
-          rooms={urgentRooms}
+          title="期限超過"
+          rooms={overdueRooms}
           titleColor="text-red-500"
           onError={(error) => setError(error)}
         />
         <RoomListBox
-          title="通常清掃"
-          rooms={normalRooms}
-          titleColor="text-green-500"
+          title="退去予定"
+          rooms={scheduledRooms}
+          titleColor="text-gray-500"
           onError={(error) => setError(error)}
         />
         <RoomListBox
-          title="期限超過"
-          rooms={overdueRooms}
-          titleColor="text-yellow-500"
+          title="退去済み"
+          rooms={completedRooms}
+          titleColor="text-green-500"
           onError={(error) => setError(error)}
         />
       </div>
