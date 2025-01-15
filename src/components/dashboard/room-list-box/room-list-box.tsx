@@ -8,10 +8,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import type { Room, RoomStatus } from '@/types/room';
+import type { Room } from '@/types/room';
 import { useMemo } from 'react';
-
-const VALID_STATUSES: RoomStatus[] = ['urgent', 'normal', 'overdue'];
 
 export interface RoomListBoxProps {
   title: string;
@@ -31,9 +29,11 @@ export function RoomListBox({ title, rooms, titleColor, onError }: RoomListBoxPr
             !room.property_id || 
             !room.property_name || 
             room.room_number === undefined || // 空文字は許可
+            !room.vacancy_date ||
             !room.cleaning_deadline || 
             !room.status ||
-            !VALID_STATUSES.includes(room.status)) {
+            !room.status['label-color'] ||
+            !room.status['label-text']) {
           return false;
         }
         return true;
@@ -65,9 +65,10 @@ export function RoomListBox({ title, rooms, titleColor, onError }: RoomListBoxPr
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>退去予定日</TableHead>
+              <TableHead>清掃期限</TableHead>
               <TableHead>物件名</TableHead>
               <TableHead>部屋番号</TableHead>
-              <TableHead>最終清掃期限</TableHead>
               <TableHead>ステータス</TableHead>
             </TableRow>
           </TableHeader>
@@ -78,19 +79,19 @@ export function RoomListBox({ title, rooms, titleColor, onError }: RoomListBoxPr
                 className="cursor-pointer hover:bg-gray-50"
                 onClick={() => navigate(`/rooms/${room.property_id}`)}
               >
+                <TableCell>{room.vacancy_date}</TableCell>
+                <TableCell>{room.cleaning_deadline}</TableCell>
                 <TableCell>{room.property_name}</TableCell>
                 <TableCell>{room.room_number || ''}</TableCell>
-                <TableCell>{room.cleaning_deadline}</TableCell>
                 <TableCell>
-                  <span className={`
-                    px-2 py-1 rounded-full text-sm
-                    ${room.status === 'urgent' ? 'bg-red-100 text-red-800' : ''}
-                    ${room.status === 'normal' ? 'bg-green-100 text-green-800' : ''}
-                    ${room.status === 'overdue' ? 'bg-yellow-100 text-yellow-800' : ''}
-                  `}>
-                    {room.status === 'urgent' && '緊急'}
-                    {room.status === 'normal' && '通常'}
-                    {room.status === 'overdue' && '期限超過'}
+                  <span
+                    className="px-2 py-1 rounded-full text-sm"
+                    style={{
+                      color: room.status['label-color'],
+                      backgroundColor: `${room.status['label-color']}33` // 透明度20%
+                    }}
+                  >
+                    {room.status['label-text']}
                   </span>
                 </TableCell>
               </TableRow>
@@ -108,7 +109,7 @@ export function RoomListBox({ title, rooms, titleColor, onError }: RoomListBoxPr
         <Table>
           <TableBody>
             <TableRow>
-              <TableCell colSpan={4} className="text-center text-red-500">
+              <TableCell colSpan={5} className="text-center text-red-500">
                 {error instanceof Error ? error.message : 'データの取得に失敗しました'}
               </TableCell>
             </TableRow>
