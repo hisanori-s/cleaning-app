@@ -70,19 +70,19 @@
   - [x] テストコードでのパス参照更新
 
 ### Phase 2: 型定義の整備
-- [ ] Room型の定義
-  - [ ] `src/types/room.ts`の作成または更新
-  - [ ] プロパティの型定義
+- [x] Room型の定義
+  - [x] `src/types/room.ts`の作成または更新
+  - [x] プロパティの型定義
     - `property_id`: number
     - `property_name`: string
     - `room_number`: string
     - `vacancy_date`: string (ISO 8601形式)
     - `cleaning_deadline`: string (ISO 8601形式)
     - `status`: 'urgent' | 'normal' | 'overdue'
-  - [ ] 関連する型定義の確認と更新
-- [ ] テスト用のモックデータ型定義
-  - [ ] `src/__tests__/mocks/types.ts`の作成
-  - [ ] モックデータの型安全性の確保
+  - [x] 関連する型定義の確認と更新
+- [x] テスト用のモックデータ型定義
+  - [x] `src/__tests__/mocks/types.ts`の作成
+  - [x] モックデータの型安全性の確保
 
 ### Phase 3: 動作確認とクリーンアップ
 - [ ] テスト実行による動作確認
