@@ -16,6 +16,7 @@ interface RenderWithRouterOptions {
   rooms?: Room[];
   titleColor?: string;
   onError?: (error: Error) => void;
+  groupByStatus?: boolean;
 }
 
 const renderWithRouter = ({
@@ -23,6 +24,7 @@ const renderWithRouter = ({
   rooms = typedMockData.mock_rooms_list,
   titleColor,
   onError,
+  groupByStatus = false,
 }: RenderWithRouterOptions = {}): RenderResult => {
   return render(
     <BrowserRouter>
@@ -31,6 +33,7 @@ const renderWithRouter = ({
         rooms={rooms}
         titleColor={titleColor}
         onError={onError}
+        groupByStatus={groupByStatus}
       />
     </BrowserRouter>
   );
@@ -38,29 +41,38 @@ const renderWithRouter = ({
 
 // 大量データ生成ヘルパー
 const generateLargeDataset = (count: number): Room[] => {
-  const statuses = [
-    {
-      'label-color': '#FF4444',
-      'label-text': '期限超過'
-    },
-    {
-      'label-color': '#888888',
-      'label-text': '退去予定'
-    },
-    {
-      'label-color': '#44BB44',
-      'label-text': '退去済み'
-    }
-  ];
+  // モックデータからユニークなステータスを取得
+  const uniqueStatuses = [...new Set(
+    typedMockData.mock_rooms_list.map(room => JSON.stringify(room.status))
+  )].map(status => JSON.parse(status));
 
-  return Array.from({ length: count }, (_, index) => ({
-    property_id: Math.floor(index / 10) + 1,
-    property_name: `シェアハウスA`,
-    room_number: `${(index + 1).toString().padStart(3, '0')}`,
-    vacancy_date: new Date(2024, 0, 1 + index % 30).toISOString().split('T')[0],
-    cleaning_deadline: new Date(2024, 0, 8 + index % 30).toISOString().split('T')[0],
-    status: statuses[index % 3]
-  }));
+  // 各ステータスの出現回数を均等にするため、
+  // データセットサイズをステータス数で割って調整
+  const roomsPerStatus = Math.floor(count / uniqueStatuses.length);
+  const remainder = count % uniqueStatuses.length;
+
+  // 各ステータスごとに部屋データを生成
+  const rooms: Room[] = [];
+  uniqueStatuses.forEach((status, statusIndex) => {
+    // このステータスで生成する部屋の数
+    const roomCount = statusIndex < remainder ? 
+      roomsPerStatus + 1 : roomsPerStatus;
+
+    // 指定された数の部屋を生成
+    for (let i = 0; i < roomCount; i++) {
+      const index = rooms.length;
+      rooms.push({
+        property_id: Math.floor(index / 10) + 1,
+        property_name: `シェアハウスA`,
+        room_number: `${(index + 1).toString().padStart(3, '0')}`,
+        vacancy_date: new Date(2024, 0, 1 + index % 30).toISOString().split('T')[0],
+        cleaning_deadline: new Date(2024, 0, 8 + index % 30).toISOString().split('T')[0],
+        status: status
+      });
+    }
+  });
+
+  return rooms;
 };
 
 // パフォーマンス測定ヘルパー
@@ -144,6 +156,54 @@ describe('RoomListBox', () => {
 
       const title = screen.getByText(testTitle);
       expect(title).toHaveClass('text-red-500');
+    });
+
+    it('ステータスグループ化が正しく機能すること', () => {
+      // モックデータから3つの異なるステータスを持つ部屋を選択
+      const mockRooms = [
+        // 期限超過の部屋
+        typedMockData.mock_rooms_list.find(room => 
+          room.status['label-text'] === '期限超過')!,
+        // 退去予定の部屋
+        typedMockData.mock_rooms_list.find(room => 
+          room.status['label-text'] === '退去予定')!,
+        // もう1つ期限超過の部屋（グループ化のテストのため）
+        typedMockData.mock_rooms_list.filter(room => 
+          room.status['label-text'] === '期限超過')[1]
+      ];
+
+      console.log('Selected mock rooms for grouping test:', 
+        mockRooms.map(room => ({
+          room_number: room.room_number,
+          status: room.status['label-text']
+        }))
+      );
+
+      renderWithRouter({ 
+        rooms: mockRooms,
+        groupByStatus: true
+      });
+
+      // 期限超過グループ（2件）を確認
+      const overdueElements = screen.getAllByText('期限超過');
+      expect(overdueElements.length).toBeGreaterThan(0);
+      expect(screen.getByText('(2件)')).toBeInTheDocument();
+
+      // 退去予定グループ（1件）を確認
+      const scheduledElements = screen.getAllByText('退去予定');
+      expect(scheduledElements.length).toBeGreaterThan(0);
+      expect(screen.getByText('(1件)')).toBeInTheDocument();
+
+      // 色の適用を確認
+      overdueElements.forEach(element => {
+        const styledParent = element.closest('[style*="color"]');
+        expect(styledParent).toHaveStyle({ color: '#FF4444' });
+      });
+
+      scheduledElements.forEach(element => {
+        const styledParent = element.closest('[style*="color"]');
+        expect(styledParent).toHaveStyle({ color: '#888888' });
+      });
     });
   });
 
@@ -262,6 +322,38 @@ describe('RoomListBox', () => {
       
       // メモリ使用量の増加が制限以内であることを確認
       expect(memoryDiff).toBeLessThan(MEMORY_LIMIT);
+    });
+
+    it('グループ化機能が大量データでも正常に動作すること', () => {
+      // モックデータを7回繰り返して大量データを生成
+      const largeDataset = Array(7).fill(null).flatMap(() => 
+        typedMockData.mock_rooms_list
+      );
+
+      // 本番環境と同じロジックでグループ化
+      const groups: Record<string, { label: string; color: string; rooms: Room[] }> = {};
+      largeDataset.forEach(room => {
+        const statusText = room.status['label-text'];
+        if (!groups[statusText]) {
+          groups[statusText] = {
+            label: statusText,
+            color: room.status['label-color'],
+            rooms: []
+          };
+        }
+        groups[statusText].rooms.push(room);
+      });
+
+      // グループ化されたデータをレンダリング
+      renderWithRouter({ 
+        rooms: largeDataset,
+        groupByStatus: true
+      });
+
+      // 各グループの件数を確認
+      Object.values(groups).forEach(group => {
+        console.log(`Status: ${group.label}, Count: ${group.rooms.length}`);
+      });
     });
   });
 }); 

@@ -48,11 +48,6 @@ export default function DashboardPage() {
     );
   }
 
-  // ステータスごとの部屋のフィルタリング
-  const overdueRooms = rooms.filter(room => room.status['label-text'] === '期限超過');
-  const scheduledRooms = rooms.filter(room => room.status['label-text'] === '退去予定');
-  const completedRooms = rooms.filter(room => room.status['label-text'] === '退去済み');
-
   return (
     <div className="container mx-auto p-4 space-y-6">
       <h1 className="text-2xl font-bold mb-6">ダッシュボード</h1>
@@ -62,27 +57,13 @@ export default function DashboardPage() {
         message="このダッシュボードでは、担当する部屋の清掃状況を確認できます。"
       />
       
-      {/* 状態別の部屋一覧 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <RoomListBox
-          title="期限超過"
-          rooms={overdueRooms}
-          titleColor="text-red-500"
-          onError={(error) => setError(error)}
-        />
-        <RoomListBox
-          title="退去予定"
-          rooms={scheduledRooms}
-          titleColor="text-gray-500"
-          onError={(error) => setError(error)}
-        />
-        <RoomListBox
-          title="退去済み"
-          rooms={completedRooms}
-          titleColor="text-green-500"
-          onError={(error) => setError(error)}
-        />
-      </div>
+      {/* ステータスごとの部屋一覧 */}
+      <RoomListBox
+        title="ステータス別部屋一覧"
+        rooms={rooms}
+        groupByStatus={true}
+        onError={(error) => setError(error)}
+      />
 
       {/* 全部屋一覧 */}
       <RoomListBox
