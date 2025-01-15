@@ -1,11 +1,14 @@
 import React from 'react';
 import { render, screen, waitFor, RenderResult } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { RoomListBox } from '@/components/dashboard/room-list-box/room-list-box';
 import { BrowserRouter } from 'react-router-dom';
-import type { Room } from '@/types/room';
+import type { Room, RoomListResponse, RoomStatus } from '@/types/room';
 import mockData from '@/__tests__/mocks/api/properties-rooms.json';
+
+// モックデータの型アサーション
+const typedMockData = mockData as RoomListResponse;
 
 // テストヘルパー
 interface RenderWithRouterOptions {
@@ -17,7 +20,7 @@ interface RenderWithRouterOptions {
 
 const renderWithRouter = ({
   title = '清掃予定の部屋',
-  rooms = [],
+  rooms = typedMockData.mock_rooms_list,
   titleColor,
   onError,
 }: RenderWithRouterOptions = {}): RenderResult => {
@@ -33,152 +36,180 @@ const renderWithRouter = ({
   );
 };
 
-// テストデータ
-const mockRooms: Room[] = [
-  {
-    property_id: 1,
-    property_name: 'サンプルマンション',
-    room_number: '101',
-    vacancy_date: '2024-01-20',
-    cleaning_deadline: '2024-01-15',
-    status: 'normal',
-  },
-  {
-    property_id: 2,
-    property_name: 'サンプルマンション',
-    room_number: '102',
-    vacancy_date: '2024-01-21',
-    cleaning_deadline: '2024-01-14',
-    status: 'urgent',
-  },
-];
+// 大量データ生成ヘルパー
+const generateLargeDataset = (count: number): Room[] => {
+  const statuses: RoomStatus[] = ['urgent', 'normal', 'overdue'];
+  return Array.from({ length: count }, (_, index) => ({
+    property_id: Math.floor(index / 100) + 1,
+    property_name: `シェアハウス${String.fromCharCode(65 + Math.floor(index / 100))}`,
+    room_number: `${Math.floor(index % 100 + 1).toString().padStart(2, '0')}${Math.floor(index / 100 + 1).toString().padStart(2, '0')}`,
+    vacancy_date: new Date(2024, 0, 1 + index % 30).toISOString().split('T')[0],
+    cleaning_deadline: new Date(2024, 0, 8 + index % 30).toISOString().split('T')[0],
+    status: statuses[index % 3]
+  }));
+};
 
-// 並び順テスト用データ
-const unorderedRooms: Room[] = [
-  {
-    property_id: 3,
-    property_name: 'サンプルマンション',
-    room_number: '201',
-    vacancy_date: '2024-01-22',
-    cleaning_deadline: '2024-01-13',
-    status: 'overdue',
-  },
-  {
-    property_id: 1,
-    property_name: 'サンプルマンション',
-    room_number: '101',
-    vacancy_date: '2024-01-20',
-    cleaning_deadline: '2024-01-15',
-    status: 'normal',
-  },
-  {
-    property_id: 2,
-    property_name: 'サンプルマンション',
-    room_number: '102',
-    vacancy_date: '2024-01-21',
-    cleaning_deadline: '2024-01-14',
-    status: 'urgent',
-  },
-];
+// パフォーマンス測定ヘルパー
+const measurePerformance = (name: string, fn: () => void): number => {
+  const startTime = performance.now();
+  fn();
+  const endTime = performance.now();
+  const duration = endTime - startTime;
+  console.log(`【${name}】: ${duration}ms`);
+  return duration;
+};
 
 describe('RoomListBox', () => {
   describe('正常系', () => {
-    it('タイトルと部屋一覧が正しく表示されること', () => {
-      renderWithRouter({ rooms: mockRooms });
+    it('モックデータの全項目が正しく表示されること', () => {
+      renderWithRouter();
 
       // タイトルの確認
       expect(screen.getByText('清掃予定の部屋')).toBeInTheDocument();
 
-      // 部屋情報の確認
-      expect(screen.getByText('101')).toBeInTheDocument();
-      expect(screen.getByText('最終清掃: 2024-01-15')).toBeInTheDocument();
-      expect(screen.getByText('102')).toBeInTheDocument();
-      expect(screen.getByText('最終清掃: 2024-01-14')).toBeInTheDocument();
+      // すべての部屋情報の確認
+      typedMockData.mock_rooms_list.forEach((room) => {
+        expect(screen.getByText(room.room_number)).toBeInTheDocument();
+        expect(screen.getByText(`最終清掃: ${room.cleaning_deadline}`)).toBeInTheDocument();
+        expect(screen.getByText(room.property_name)).toBeInTheDocument();
+      });
+    });
+
+    it('データの順序が保持されていること', () => {
+      renderWithRouter();
+
+      const roomElements = screen.getAllByText(/^[0-9]{3}$/);
+      expect(roomElements).toHaveLength(typedMockData.mock_rooms_list.length);
+      
+      typedMockData.mock_rooms_list.forEach((room, index) => {
+        expect(roomElements[index]).toHaveTextContent(room.room_number);
+      });
     });
 
     it('タイトルの色が正しく適用されること', () => {
       renderWithRouter({
         title: '緊急清掃',
-        rooms: mockRooms,
         titleColor: 'text-red-500',
       });
 
       const title = screen.getByText('緊急清掃');
       expect(title).toHaveClass('text-red-500');
     });
-
-    it('データの並び順が表示順と一致すること', () => {
-      renderWithRouter({ rooms: unorderedRooms });
-
-      const roomElements = screen.getAllByText(/^[0-9]{3}$/);
-      expect(roomElements).toHaveLength(3);
-      expect(roomElements[0]).toHaveTextContent('201');
-      expect(roomElements[1]).toHaveTextContent('101');
-      expect(roomElements[2]).toHaveTextContent('102');
-    });
   });
 
   describe('異常系', () => {
     it('部屋が空の場合、何も表示されないこと', () => {
       renderWithRouter({ rooms: [] });
-
-      // タイトルが表示されていないことを確認
       expect(screen.queryByText('清掃予定の部屋')).not.toBeInTheDocument();
     });
 
-  it('不正なデータ形式の場合、エラーを発生させずにスキップすること', () => {
-    // @ts-expect-error 意図的に不正なデータを渡す
-    const invalidRooms: Room[] = [
-      {
-        property_id: 1,
-        property_name: 'サンプルマンション',
-        vacancy_date: '2024-01-20',
-        cleaning_deadline: '2024-01-15',
-        status: 'normal',
-      } as Room,
-      {
-        property_name: 'サンプルマンション',
-        room_number: '102',
-        vacancy_date: '2024-01-21',
-        cleaning_deadline: '2024-01-14',
-        status: 'urgent',
-      } as Room,
-    ];
+    it('不正なデータ形式の場合、エラーを発生させずにスキップすること', () => {
+      const invalidRooms = [
+        {
+          property_id: 1,
+          property_name: 'サンプルマンション',
+          room_number: '101',
+          vacancy_date: '2024-01-20',
+          cleaning_deadline: '2024-01-15',
+          status: 'urgent' as RoomStatus,
+        },
+        {
+          property_id: 2,
+          property_name: 'サンプルマンション',
+          room_number: '102',
+          vacancy_date: '2024-01-21',
+          cleaning_deadline: '2024-01-14',
+          // @ts-expect-error 意図的に不正なステータスを設定
+          status: 'invalid_status',
+        },
+      ];
 
-    // エラーが発生しないことを確認
-    expect(() => {
-      renderWithRouter(
-        <RoomListBox
-          title="清掃予定の部屋"
-          rooms={invalidRooms}
-        />
-      );
-    }).not.toThrow();
+      expect(() => {
+        renderWithRouter({ rooms: invalidRooms });
+      }).not.toThrow();
 
-    // 不正なデータはスキップされ、有効なデータのみ表示されることを確認
-    expect(screen.queryByText('102')).not.toBeInTheDocument();
+      // 正常なデータの部屋は表示されることを確認
+      expect(screen.getByText('101')).toBeInTheDocument();
+      // 不正なデータを含む部屋は表示されないことを確認
+      expect(screen.queryByText('102')).not.toBeInTheDocument();
+    });
+
+    it('ネットワークエラー時にエラーメッセージが表示されること', async () => {
+      const errorMessage = 'ネットワークエラーが発生しました';
+      
+      renderWithRouter({
+        rooms: [],
+        onError: (error) => {
+          expect(error.message).toBe(errorMessage);
+        }
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('データの取得に失敗しました')).toBeInTheDocument();
+      });
+    });
   });
 
-  it('ネットワークエラー時にエラーメッセージが表示されること', async () => {
-    // モックエラーメッセージ
-    const errorMessage = 'ネットワークエラーが発生しました';
-    
-    // エラーを投げるモック関数
-    const mockFetchRooms = vi.fn().mockRejectedValue(new Error(errorMessage));
-    
-    renderWithRouter(
-      <RoomListBox
-        title="清掃予定の部屋"
-        rooms={[]}
-        onError={(error) => {
-          expect(error.message).toBe(errorMessage);
-        }}
-      />
-    );
+  describe('パフォーマンス', () => {
+    const LARGE_DATASET_SIZE = 1000;
+    const RENDER_TIME_LIMIT = 1000;
+    const RERENDER_TIME_LIMIT = 500;
+    const MEMORY_LIMIT = 10 * 1024 * 1024; // 10MB
 
-    // エラーメッセージの表示を待機
-    await waitFor(() => {
-      expect(screen.getByText('データの取得に失敗しました')).toBeInTheDocument();
+    it('大量データでも正常に表示できること', () => {
+      const largeDataset = generateLargeDataset(LARGE_DATASET_SIZE);
+      
+      const renderTime = measurePerformance('レンダリング時間', () => {
+        renderWithRouter({ rooms: largeDataset });
+      });
+
+      // 最初と最後のデータが表示されていることを確認
+      expect(screen.getByText('0101')).toBeInTheDocument();
+      expect(screen.getByText('1010')).toBeInTheDocument();
+      
+      // レンダリング時間が制限以内であることを確認
+      expect(renderTime).toBeLessThan(RENDER_TIME_LIMIT);
+    });
+
+    it('大量データの再レンダリングが最適化されていること', () => {
+      const largeDataset = generateLargeDataset(LARGE_DATASET_SIZE);
+      const { rerender } = renderWithRouter({ rooms: largeDataset });
+
+      const rerenderTime = measurePerformance('再レンダリング時間', () => {
+        rerender(
+          <BrowserRouter>
+            <RoomListBox
+              title="タイトル変更"
+              rooms={largeDataset}
+            />
+          </BrowserRouter>
+        );
+      });
+
+      // 再レンダリング時間が制限以内であることを確認
+      expect(rerenderTime).toBeLessThan(RERENDER_TIME_LIMIT);
+      
+      // タイトルが更新されていることを確認
+      expect(screen.getByText('タイトル変更')).toBeInTheDocument();
+    });
+
+    it('メモリリークが発生しないこと', () => {
+      const initialMemory = process.memoryUsage().heapUsed;
+      const largeDataset = generateLargeDataset(LARGE_DATASET_SIZE);
+      
+      // 複数回レンダリングと破棄を繰り返す
+      for (let i = 0; i < 5; i++) {
+        const { unmount } = renderWithRouter({ rooms: largeDataset });
+        unmount();
+      }
+
+      const finalMemory = process.memoryUsage().heapUsed;
+      const memoryDiff = finalMemory - initialMemory;
+      
+      console.log(`【メモリ使用量の変化】: ${memoryDiff / 1024 / 1024}MB`);
+      
+      // メモリ使用量の増加が制限以内であることを確認
+      expect(memoryDiff).toBeLessThan(MEMORY_LIMIT);
     });
   });
 }); 
