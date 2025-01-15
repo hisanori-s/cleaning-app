@@ -1,10 +1,37 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, RenderResult } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { RoomListBox } from '@/components/dashboard/room-list-box/room-list-box';
 import { BrowserRouter } from 'react-router-dom';
 import type { Room } from '@/types/room';
+import mockData from '@/__tests__/mocks/api/properties-rooms.json';
+
+// テストヘルパー
+interface RenderWithRouterOptions {
+  title?: string;
+  rooms?: Room[];
+  titleColor?: string;
+  onError?: (error: Error) => void;
+}
+
+const renderWithRouter = ({
+  title = '清掃予定の部屋',
+  rooms = [],
+  titleColor,
+  onError,
+}: RenderWithRouterOptions = {}): RenderResult => {
+  return render(
+    <BrowserRouter>
+      <RoomListBox
+        title={title}
+        rooms={rooms}
+        titleColor={titleColor}
+        onError={onError}
+      />
+    </BrowserRouter>
+  );
+};
 
 // テストデータ
 const mockRooms: Room[] = [
@@ -54,73 +81,50 @@ const unorderedRooms: Room[] = [
   },
 ];
 
-// テストユーティリティ
-const renderWithRouter = (component: React.ReactElement) => {
-  return render(
-    <BrowserRouter>
-      {component}
-    </BrowserRouter>
-  );
-};
-
 describe('RoomListBox', () => {
-  it('タイトルと部屋一覧が正しく表示されること', () => {
-    renderWithRouter(
-      <RoomListBox
-        title="清掃予定の部屋"
-        rooms={mockRooms}
-      />
-    );
+  describe('正常系', () => {
+    it('タイトルと部屋一覧が正しく表示されること', () => {
+      renderWithRouter({ rooms: mockRooms });
 
-    // タイトルの確認
-    expect(screen.getByText('清掃予定の部屋')).toBeInTheDocument();
+      // タイトルの確認
+      expect(screen.getByText('清掃予定の部屋')).toBeInTheDocument();
 
-    // 部屋情報の確認
-    expect(screen.getByText('101')).toBeInTheDocument();
-    expect(screen.getByText('最終清掃: 2024-01-15')).toBeInTheDocument();
-    expect(screen.getByText('102')).toBeInTheDocument();
-    expect(screen.getByText('最終清掃: 2024-01-14')).toBeInTheDocument();
+      // 部屋情報の確認
+      expect(screen.getByText('101')).toBeInTheDocument();
+      expect(screen.getByText('最終清掃: 2024-01-15')).toBeInTheDocument();
+      expect(screen.getByText('102')).toBeInTheDocument();
+      expect(screen.getByText('最終清掃: 2024-01-14')).toBeInTheDocument();
+    });
+
+    it('タイトルの色が正しく適用されること', () => {
+      renderWithRouter({
+        title: '緊急清掃',
+        rooms: mockRooms,
+        titleColor: 'text-red-500',
+      });
+
+      const title = screen.getByText('緊急清掃');
+      expect(title).toHaveClass('text-red-500');
+    });
+
+    it('データの並び順が表示順と一致すること', () => {
+      renderWithRouter({ rooms: unorderedRooms });
+
+      const roomElements = screen.getAllByText(/^[0-9]{3}$/);
+      expect(roomElements).toHaveLength(3);
+      expect(roomElements[0]).toHaveTextContent('201');
+      expect(roomElements[1]).toHaveTextContent('101');
+      expect(roomElements[2]).toHaveTextContent('102');
+    });
   });
 
-  it('部屋が空の場合、何も表示されないこと', () => {
-    renderWithRouter(
-      <RoomListBox
-        title="清掃予定の部屋"
-        rooms={[]}
-      />
-    );
+  describe('異常系', () => {
+    it('部屋が空の場合、何も表示されないこと', () => {
+      renderWithRouter({ rooms: [] });
 
-    // タイトルが表示されていないことを確認
-    expect(screen.queryByText('清掃予定の部屋')).not.toBeInTheDocument();
-  });
-
-  it('タイトルの色が正しく適用されること', () => {
-    renderWithRouter(
-      <RoomListBox
-        title="緊急清掃"
-        rooms={mockRooms}
-        titleColor="text-red-500"
-      />
-    );
-
-    const title = screen.getByText('緊急清掃');
-    expect(title).toHaveClass('text-red-500');
-  });
-
-  it('データの並び順が表示順と一致すること', () => {
-    renderWithRouter(
-      <RoomListBox
-        title="清掃予定の部屋"
-        rooms={unorderedRooms}
-      />
-    );
-
-    const roomElements = screen.getAllByText(/^[0-9]{3}$/);
-    expect(roomElements).toHaveLength(3);
-    expect(roomElements[0]).toHaveTextContent('201');
-    expect(roomElements[1]).toHaveTextContent('101');
-    expect(roomElements[2]).toHaveTextContent('102');
-  });
+      // タイトルが表示されていないことを確認
+      expect(screen.queryByText('清掃予定の部屋')).not.toBeInTheDocument();
+    });
 
   it('不正なデータ形式の場合、エラーを発生させずにスキップすること', () => {
     // @ts-expect-error 意図的に不正なデータを渡す
