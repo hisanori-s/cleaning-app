@@ -73,11 +73,54 @@ VITE_MOCK_API_BASE_URL=http://localhost:5173/WPplugin/mock-api-return
 
 #### テスト環境
 ```typescript
-// src/__tests__/setup.ts
-process.env.VITE_WP_API_BASE_URL = 'http://localhost:5173/wp-json';
-process.env.VITE_WP_API_NAMESPACE = 'cleaning-management/v1';
-process.env.VITE_MOCK_API_BASE_URL = 'http://localhost:5173/WPplugin/mock-api-return';
+// .env.test
+VITE_WP_API_BASE_URL=http://localhost:5173/wp-json
+VITE_WP_API_NAMESPACE=cleaning-management/v1
+VITE_MOCK_API_BASE_URL=./src/__tests__/mocks/api
 ```
+
+環境変数の管理は以下の方針で行います：
+
+1. 環境別の設定ファイル
+   - 開発環境: `.env.local`
+   - テスト環境: `.env.test`
+   - 本番環境: `.env.production`
+
+2. テスト環境での注意点
+   - モックデータは相対パスで指定
+   - テストコード内での環境変数の直接操作は避ける
+   - 必要な場合は`setup.ts`でグローバルな設定を行う
+
+3. 環境変数の追加・変更時の手順
+   - すべての環境の設定ファイルを同時に更新
+   - 変更の影響範囲を確認
+   - テストの実行で動作確認
+
+### 3.3 モックデータの管理
+#### ディレクトリ構造
+```
+src/
+  __tests__/
+    mocks/
+      api/          # APIレスポンスのモックデータ
+      fixtures/     # テストケース用のフィクスチャデータ
+      types.ts      # モックデータの型定義
+```
+
+#### モックデータの取り扱い
+1. 開発段階でのモックデータ
+   - テストディレクトリ内のモックデータを利用
+   - 本番環境への移行時にAPIエンドポイントを切り替え
+
+2. テストケース用のモックデータ
+   - テストケースごとに必要なデータを作成
+   - 型安全性を確保
+   - データの意図を明確にするコメントを付与
+
+3. モックデータの更新手順
+   - 既存のテストケースへの影響を確認
+   - 型定義の更新
+   - テストの実行による動作確認
 
 ## 4. プロジェクト構成
 

@@ -1,0 +1,14 @@
+{
+  "mock_room_detail": {
+    "id": 1,
+    "property_id": 1,
+    "property_name": "シェアハウスA",
+    "property_address": "東京都新宿区○○1-2-3",
+    "room_number": "101",
+    "vacancy_date": "2024-02-01",
+    "cleaning_deadline": "2024-01-25",
+    "room_key_number": "R101",
+    "entrance_key_number": "E001",
+    "notes": "・窓のサッシの清掃を念入りに行ってください。\n・バルコニーの排水溝も確認してください。\n・前回の清掃から時間が経っているため、特に水回りの清掃を丁寧にお願いします。"
+  }
+} 
