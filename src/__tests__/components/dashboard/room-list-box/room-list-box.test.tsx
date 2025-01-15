@@ -4,7 +4,7 @@ import '@testing-library/jest-dom';
 import { describe, it, expect, vi } from 'vitest';
 import { RoomListBox } from '@/components/dashboard/room-list-box/room-list-box';
 import { BrowserRouter } from 'react-router-dom';
-import type { Room, RoomListResponse, RoomStatus } from '@/types/room';
+import type { Room, RoomListResponse } from '@/types/room';
 import mockData from '@/__tests__/mocks/api/properties-rooms.json';
 
 // モックデータの型アサーション
@@ -38,7 +38,21 @@ const renderWithRouter = ({
 
 // 大量データ生成ヘルパー
 const generateLargeDataset = (count: number): Room[] => {
-  const statuses: RoomStatus[] = ['urgent', 'normal', 'overdue'];
+  const statuses = [
+    {
+      'label-color': '#FF4444',
+      'label-text': '期限超過'
+    },
+    {
+      'label-color': '#888888',
+      'label-text': '退去予定'
+    },
+    {
+      'label-color': '#44BB44',
+      'label-text': '退去済み'
+    }
+  ];
+
   return Array.from({ length: count }, (_, index) => ({
     property_id: Math.floor(index / 10) + 1,
     property_name: `シェアハウスA`,
@@ -69,37 +83,66 @@ describe('RoomListBox', () => {
           room_number: '101',
           vacancy_date: '2024-01-20',
           cleaning_deadline: '2024-02-01',
-          status: 'urgent' as RoomStatus,
-        },
+          status: {
+            'label-color': '#FF4444',
+            'label-text': '期限超過'
+          }
+        }
       ];
 
       renderWithRouter({ rooms: mockRooms });
 
       // 各要素が正しく表示されていることを確認
       expect(screen.getByText('101')).toBeInTheDocument();
+      expect(screen.getByText('2024-01-20')).toBeInTheDocument();
       expect(screen.getByText('2024-02-01')).toBeInTheDocument();
       expect(screen.getByText('シェアハウスA')).toBeInTheDocument();
-      expect(screen.getByText('緊急')).toBeInTheDocument();
+      expect(screen.getByText('期限超過')).toBeInTheDocument();
     });
 
-    it('データの順序が保持されていること', () => {
+    it('列の順序が仕様通りであること', () => {
       renderWithRouter();
 
-      const roomElements = screen.getAllByText(/^[0-9]{3}$/);
-      expect(roomElements).toHaveLength(typedMockData.mock_rooms_list.length);
-      
-      typedMockData.mock_rooms_list.forEach((room, index) => {
-        expect(roomElements[index]).toHaveTextContent(room.room_number);
-      });
+      const headers = screen.getAllByRole('columnheader');
+      expect(headers).toHaveLength(5);
+      expect(headers[0]).toHaveTextContent('退去予定日');
+      expect(headers[1]).toHaveTextContent('清掃期限');
+      expect(headers[2]).toHaveTextContent('物件名');
+      expect(headers[3]).toHaveTextContent('部屋番号');
+      expect(headers[4]).toHaveTextContent('ステータス');
+    });
+
+    it('ステータスの色とテキストが正しく適用されること', () => {
+      const mockRooms = [
+        {
+          property_id: 1,
+          property_name: 'シェアハウスA',
+          room_number: '101',
+          vacancy_date: '2024-01-20',
+          cleaning_deadline: '2024-02-01',
+          status: {
+            'label-color': '#FF4444',
+            'label-text': 'カスタムステータス'
+          }
+        }
+      ];
+
+      renderWithRouter({ rooms: mockRooms });
+
+      const statusElement = screen.getByText('カスタムステータス');
+      const statusSpan = statusElement.closest('span');
+      expect(statusSpan).toHaveStyle({ color: '#FF4444' });
+      expect(statusSpan).toHaveStyle({ backgroundColor: '#FF444433' });
     });
 
     it('タイトルの色が正しく適用されること', () => {
+      const testTitle = 'テストタイトル';
       renderWithRouter({
-        title: '緊急清掃',
+        title: testTitle,
         titleColor: 'text-red-500',
       });
 
-      const title = screen.getByText('緊急清掃');
+      const title = screen.getByText(testTitle);
       expect(title).toHaveClass('text-red-500');
     });
   });
@@ -118,7 +161,10 @@ describe('RoomListBox', () => {
           room_number: '101',
           vacancy_date: '2024-01-20',
           cleaning_deadline: '2024-01-15',
-          status: 'urgent' as RoomStatus,
+          status: {
+            'label-color': '#FF4444',
+            'label-text': '期限超過'
+          }
         },
         {
           property_id: 2,
@@ -126,7 +172,7 @@ describe('RoomListBox', () => {
           room_number: '102',
           vacancy_date: '2024-01-21',
           cleaning_deadline: '2024-01-14',
-          status: 'invalid' as RoomStatus, // 不正なステータス
+          status: {} // 不正なステータス
         },
       ] as unknown as Room[];
 
