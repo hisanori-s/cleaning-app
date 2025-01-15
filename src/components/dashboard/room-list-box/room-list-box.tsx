@@ -1,5 +1,13 @@
 import { useNavigate } from 'react-router-dom';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import type { Room, RoomStatus } from '@/types/room';
 import { useMemo } from 'react';
 
@@ -54,23 +62,41 @@ export function RoomListBox({ title, rooms, titleColor, onError }: RoomListBoxPr
         <CardHeader>
           <CardTitle className={titleColor}>{title}</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>物件名</TableHead>
+              <TableHead>部屋番号</TableHead>
+              <TableHead>最終清掃期限</TableHead>
+              <TableHead>ステータス</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {validRooms.map((room, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer"
+              <TableRow
+                key={`${room.property_id}-${room.room_number}-${index}`}
+                className="cursor-pointer hover:bg-gray-50"
                 onClick={() => navigate(`/rooms/${room.property_id}`)}
               >
-                <div className="flex flex-col">
-                  <span className="text-sm text-gray-600">{room.property_name}</span>
-                  <span>{room.room_number || ''}</span>
-                </div>
-                <span className="text-sm text-gray-600">最終清掃: {room.cleaning_deadline}</span>
-              </div>
+                <TableCell>{room.property_name}</TableCell>
+                <TableCell>{room.room_number || ''}</TableCell>
+                <TableCell>{room.cleaning_deadline}</TableCell>
+                <TableCell>
+                  <span className={`
+                    px-2 py-1 rounded-full text-sm
+                    ${room.status === 'urgent' ? 'bg-red-100 text-red-800' : ''}
+                    ${room.status === 'normal' ? 'bg-green-100 text-green-800' : ''}
+                    ${room.status === 'overdue' ? 'bg-yellow-100 text-yellow-800' : ''}
+                  `}>
+                    {room.status === 'urgent' && '緊急'}
+                    {room.status === 'normal' && '通常'}
+                    {room.status === 'overdue' && '期限超過'}
+                  </span>
+                </TableCell>
+              </TableRow>
             ))}
-          </div>
-        </CardContent>
+          </TableBody>
+        </Table>
       </Card>
     );
   } catch (error) {
@@ -79,9 +105,15 @@ export function RoomListBox({ title, rooms, titleColor, onError }: RoomListBoxPr
     }
     return (
       <Card>
-        <CardContent>
-          <div className="text-red-500">{error instanceof Error ? error.message : 'データの取得に失敗しました'}</div>
-        </CardContent>
+        <Table>
+          <TableBody>
+            <TableRow>
+              <TableCell colSpan={4} className="text-center text-red-500">
+                {error instanceof Error ? error.message : 'データの取得に失敗しました'}
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
       </Card>
     );
   }

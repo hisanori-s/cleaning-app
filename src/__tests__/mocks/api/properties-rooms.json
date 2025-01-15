@@ -6,7 +6,10 @@
       "room_number": "101",
       "vacancy_date": "2024-01-25",
       "cleaning_deadline": "2024-02-01",
-      "status": "urgent"
+      "status": {
+        "label-color": "#FF4444",
+        "label-text": "期限超過"
+      }
     },
     {
       "property_id": 1,
@@ -14,7 +17,10 @@
       "room_number": "102",
       "vacancy_date": "2024-02-05",
       "cleaning_deadline": "2024-02-12",
-      "status": "normal"
+      "status": {
+        "label-color": "#888888",
+        "label-text": "退去予定"
+      }
     },
     {
       "property_id": 1,
@@ -22,7 +28,10 @@
       "room_number": "201",
       "vacancy_date": "2024-01-22",
       "cleaning_deadline": "2024-01-29",
-      "status": "overdue"
+      "status": {
+        "label-color": "#44BB44",
+        "label-text": "退去済み"
+      }
     },
     {
       "property_id": 1,
@@ -30,7 +39,10 @@
       "room_number": "202",
       "vacancy_date": "2024-02-15",
       "cleaning_deadline": "2024-02-22",
-      "status": "normal"
+      "status": {
+        "label-color": "#888888",
+        "label-text": "退去予定"
+      }
     },
     {
       "property_id": 1,
@@ -38,7 +50,10 @@
       "room_number": "301",
       "vacancy_date": "2024-01-31",
       "cleaning_deadline": "2024-02-07",
-      "status": "urgent"
+      "status": {
+        "label-color": "#FF4444",
+        "label-text": "期限超過"
+      }
     },
     {
       "property_id": 1,
@@ -46,7 +61,10 @@
       "room_number": "302",
       "vacancy_date": "2024-02-20",
       "cleaning_deadline": "2024-02-27",
-      "status": "normal"
+      "status": {
+        "label-color": "#888888",
+        "label-text": "退去予定"
+      }
     },
     {
       "property_id": 1,
@@ -54,7 +72,10 @@
       "room_number": "401",
       "vacancy_date": "2024-02-28",
       "cleaning_deadline": "2024-03-06",
-      "status": "normal"
+      "status": {
+        "label-color": "#888888",
+        "label-text": "退去予定"
+      }
     },
     {
       "property_id": 1,
@@ -62,7 +83,10 @@
       "room_number": "402",
       "vacancy_date": "2024-01-20",
       "cleaning_deadline": "2024-01-27",
-      "status": "overdue"
+      "status": {
+        "label-color": "#FF4444",
+        "label-text": "期限超過"
+      }
     }
   ]
 } 

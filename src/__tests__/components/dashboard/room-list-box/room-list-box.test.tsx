@@ -77,8 +77,9 @@ describe('RoomListBox', () => {
 
       // 各要素が正しく表示されていることを確認
       expect(screen.getByText('101')).toBeInTheDocument();
-      expect(screen.getByText('最終清掃: 2024-02-01')).toBeInTheDocument();
+      expect(screen.getByText('2024-02-01')).toBeInTheDocument();
       expect(screen.getByText('シェアハウスA')).toBeInTheDocument();
+      expect(screen.getByText('緊急')).toBeInTheDocument();
     });
 
     it('データの順序が保持されていること', () => {

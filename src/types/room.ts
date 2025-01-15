@@ -1,10 +1,11 @@
 /**
  * 部屋の状態を表す型
- * - urgent: 緊急（清掃期限が迫っている）
- * - normal: 通常
- * - overdue: 期限超過
+ * ラベルの色とテキストを含む
  */
-export type RoomStatus = 'urgent' | 'normal' | 'overdue';
+export interface RoomStatus {
+  'label-color': string;  // HEXカラーコード
+  'label-text': string;   // 表示テキスト
+}
 
 /**
  * 部屋情報の型定義
