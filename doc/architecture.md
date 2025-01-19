@@ -31,14 +31,7 @@ src/
 │   │
 │   └── ui/              # 共通UIコンポーネント
 │       ├── alert.tsx
-│       ├── button.tsx
-│       ├── card.tsx
-│       ├── checkbox.tsx
-│       ├── dropdown-menu.tsx
-│       ├── form.tsx
-│       ├── input.tsx
-│       ├── skeleton.tsx
-│       └── textarea.tsx
+│       …
 │
 ├── hooks/               # カスタムフック
 │   ├── use-auth.ts
@@ -58,10 +51,9 @@ src/
 │   │   └── page.tsx   # ダッシュボード
 │   │
 │   └── rooms/
-│       └── [id]/
-│           ├── page.tsx     # 部屋詳細
-│           └── report/
-│               └── page.tsx # レポート作成
+│   │  └── page.tsx     # 部屋詳細
+│   └── report/
+│       └── page.tsx     # レポート作成
 │
 ├── types/             # 共通型定義
 │   └── index.ts      # 型定義

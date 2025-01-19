@@ -6,22 +6,6 @@ import { RoomInfoBox } from '../../components/room-detail/room-info-box/room-inf
 import { getRoomDetails, getRoomCleaningHistory } from '../../api/wordpress';
 import type { Room, CleaningReport } from '../../types';
 
-// 清掃履歴コンポーネント
-function CleaningHistory({ history }: { history: CleaningReport[] }) {
-  return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold">清掃履歴</h2>
-      {history.map((entry) => (
-        <div key={entry.id} className="border-b pb-4">
-          <p className="font-semibold">{entry.date}</p>
-          <p>清掃者: {entry.cleanerId}</p>
-          <p>{entry.comments}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 // 部屋詳細ページ
 export default function RoomDetailPage() {
   const { roomId } = useParams();
