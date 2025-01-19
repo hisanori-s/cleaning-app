@@ -1,8 +1,8 @@
 import { Card, CardHeader, CardTitle, CardContent } from '../../ui/card';
-import type { Room } from '../../../types';
+import type { RoomDetail } from '../../../types/room-detail';
 
 export interface PropertyInfoBoxProps {
-  room: Room;
+  room: RoomDetail;
 }
 
 export function PropertyInfoBox({ room }: PropertyInfoBoxProps) {
@@ -15,11 +15,20 @@ export function PropertyInfoBox({ room }: PropertyInfoBoxProps) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="font-semibold">物件名:</p>
-            <p>{room.name}</p>
+            <p>{room.property_name}</p>
           </div>
           <div>
-            <p className="font-semibold">階:</p>
-            <p>{room.floor}</p>
+            <p className="font-semibold">物件ID:</p>
+            <p>{room.property_id}</p>
+          </div>
+          <div>
+            <p className="font-semibold">住所:</p>
+            <p>{room.property_address}</p>
+          </div>
+          <div>
+            <p className="font-semibold">鍵情報:</p>
+            <p>部屋: {room.room_key_number}</p>
+            <p>玄関: {room.entrance_key_number}</p>
           </div>
         </div>
       </CardContent>

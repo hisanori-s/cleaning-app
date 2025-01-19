@@ -65,6 +65,14 @@ export interface PaginatedResponse<T> {
   hasMore: boolean;
 }
 
+// 基本的な型定義のエクスポート
+export * from './room';
+export * from './room-detail';
+export * from './user';
+export * from './cleaning-report';
+export * from './api';
+
+// レスポンス型の定義
 export type LoginResponse = ApiResponse<{
   token: string;
   user: User;

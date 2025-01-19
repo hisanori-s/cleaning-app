@@ -1,79 +1,55 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
+import { RoomDetailFetch } from '../../components/room-detail/room-detail-fetch/room-detail-fetch';
 import { PropertyInfoBox } from '../../components/room-detail/property-info-box/property-info-box';
 import { RoomInfoBox } from '../../components/room-detail/room-info-box/room-info-box';
-import { getRoomDetails, getRoomCleaningHistory } from '../../api/wordpress';
-import type { Room, CleaningReport } from '../../types';
+import type { Room } from '../../types/room';
 
 // 部屋詳細ページ
 export default function RoomDetailPage() {
-  const { roomId } = useParams();
   const navigate = useNavigate();
   const [room, setRoom] = useState<Room | null>(null);
-  const [history, setHistory] = useState<CleaningReport[]>([]);
-  const [loading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    const fetchRoomData = async () => {
-      if (!roomId) return;
-      
-      try {
-        const [roomResponse, historyResponse] = await Promise.all([
-          getRoomDetails(parseInt(roomId, 10)),
-          getRoomCleaningHistory(parseInt(roomId, 10))
-        ]);
+  const handleDataLoaded = (data: Room | null) => {
+    setRoom(data);
+    setError(null);
+  };
 
-        if (roomResponse.success && roomResponse.data) {
-          setRoom(roomResponse.data);
-        }
-        setHistory(historyResponse);
-      } catch (error) {
-        console.error('Failed to fetch room data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchRoomData();
-  }, [roomId]);
-
-  if (loading) {
-    return (
-      <div className="container mx-auto p-4">
-        <div className="text-center text-gray-600">
-          データを読み込んでいます...
-        </div>
-      </div>
-    );
-  }
-
-  if (!room) {
-    return (
-      <div className="container mx-auto p-4">
-        <div className="text-center text-gray-600">
-          部屋が見つかりませんでした
-        </div>
-      </div>
-    );
-  }
+  const handleError = (err: Error) => {
+    setError(err);
+    setRoom(null);
+  };
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <PropertyInfoBox room={room} />
-      <RoomInfoBox room={room} />
-      <CleaningHistory history={history} />
+    <div className="container mx-auto p-4">
+      <RoomDetailFetch 
+        onDataLoaded={handleDataLoaded}
+        onError={handleError}
+      />
+
+      {room && (
+        <div className="space-y-6 mb-6">
+          <PropertyInfoBox room={room} />
+          <RoomInfoBox room={room} />
+        </div>
+      )}
+
+      {error && (
+        <div className="text-center text-red-500 mb-6">
+          エラーが発生しました: {error.message}
+        </div>
+      )}
 
       <div className="flex justify-end space-x-4">
         <Button
           variant="outline"
-          onClick={() => navigate('/rooms')}
+          onClick={() => navigate('/')}
         >
           部屋一覧に戻る
         </Button>
-        <Button
-          onClick={() => navigate(`/rooms/${roomId}/report`)}
-        >
+        <Button disabled={true}>
           清掃報告を作成
         </Button>
       </div>

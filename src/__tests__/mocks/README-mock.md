@@ -10,7 +10,7 @@ mocks/
   ├── api/              # APIレスポンスのモックデータ
   │   ├── auth.json     # 認証関連のモックデータ
   │   ├── properties-rooms.json  # 物件・部屋情報のモックデータ
-  │   ├── room-detail.json      # 部屋詳細情報のモックデータ
+  │   ├── room-detail.json      # 部屋詳細情報のモックデータ/物件情報もコレに一緒に入れて取得にする
   │   └── reports.json          # 清掃レポートのモックデータ
   └── README-mock.md    # 本ドキュメント
 ```

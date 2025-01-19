@@ -87,6 +87,17 @@
         "label-color": "#FF4444",
         "label-text": "期限超過"
       }
+    },
+    {
+      "property_id": 1,
+      "property_name": "シェアハウスA",
+      "room_number": "sample1",
+      "vacancy_date": "2024-02-15",
+      "cleaning_deadline": "2024-02-08",
+      "status": {
+        "label-color": "#4CAF50",
+        "label-text": "清掃待ち"
+      }
     }
   ]
 } 

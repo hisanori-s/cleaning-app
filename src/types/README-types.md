@@ -7,15 +7,47 @@
 ## ディレクトリ構造
 ```
 src/types/
-├── README-types.md  # この文書
-├── index.ts         # 型定義のエントリーポイント
-└── room.ts          # 部屋関連の型定義
+├── README-types.md     # この文書
+├── index.ts           # 型定義のエントリーポイント
+├── api.ts            # API共通の型定義
+├── cleaning-report.ts # 清掃レポート関連の型定義
+├── room.ts           # 部屋一覧関連の型定義
+├── room-detail.ts    # 部屋詳細関連の型定義
+└── user.ts           # ユーザー関連の型定義
 ```
 
 ## 型定義一覧
 
+### api.ts
+API通信に関する共通の型定義を提供します。
+
+#### `ApiResponse<T>`
+APIレスポンスの基本形
+```typescript
+interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+  };
+}
+```
+
+#### `PaginatedResponse<T>`
+ページネーション付きレスポンスの型
+```typescript
+interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+```
+
 ### room.ts
-部屋情報に関する型定義を提供します。
+部屋一覧情報に関する型定義を提供します。
 
 #### `RoomStatus`
 部屋の状態を表す型
@@ -47,30 +79,76 @@ interface RoomListResponse {
 }
 ```
 
-## テスト用の型定義
+### room-detail.ts
+部屋詳細情報に関する型定義を提供します。
 
-テスト用の型定義は `src/__tests__/mocks/types.ts` に配置されています。
-これらの型は、テストで使用するモックデータの型安全性を確保するために使用されます。
+#### `RoomDetail`
+部屋の詳細情報を表す型
+```typescript
+interface RoomDetail {
+  id: number;
+  property_id: number;
+  property_name: string;
+  property_address: string;
+  room_number: string;
+  vacancy_date: string;
+  cleaning_deadline: string;
+  room_key_number: string;
+  entrance_key_number: string;
+  notes: string;
+  status: RoomDetailStatus;
+}
+```
 
-### モックデータの型
-- `MockUser`: 認証用のモックユーザー情報
-- `MockAuthResponse`: 認証用のモックレスポンス
-- `MockRoomListResponse`: 部屋一覧のモックレスポンス
-- `MockRoomDetail`: 部屋詳細のモック情報（`Room`を拡張）
-- `MockRoomDetailResponse`: 部屋詳細のモックレスポンス
-- `MockCleaningReport`: 清掃レポートのモック情報
-- `MockReportResponse`: 清掃レポートのモックレスポンス
+### user.ts
+ユーザー情報に関する型定義を提供します。
+
+#### `User`
+ユーザー情報を表す型
+```typescript
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  role: 'cleaner';
+  assigned_rooms: number[];
+}
+```
+
+### cleaning-report.ts
+清掃レポートに関する型定義を提供します。
+
+#### `CleaningReport`
+清掃レポートの情報を表す型
+```typescript
+interface CleaningReport {
+  id: number;
+  roomId: number;
+  cleanerId: number;
+  date: string;
+  checklist: {
+    floor: boolean;
+    bathroom: boolean;
+    kitchen: boolean;
+    windows: boolean;
+    furniture: boolean;
+  };
+  comments: string;
+  images: string[];
+  status: 'submitted' | 'approved' | 'rejected';
+}
+```
 
 ## 使用方法
 
 1. 型のインポート
 ```typescript
-import { Room, RoomStatus } from '@/types/room';
+import { RoomDetail, User, CleaningReport } from '@/types';
 ```
 
-2. テスト用の型のインポート
+2. API関連の型の使用
 ```typescript
-import { MockRoomListResponse } from '@/__tests__/mocks/types';
+import { ApiResponse, PaginatedResponse } from '@/types';
 ```
 
 ## 注意事項

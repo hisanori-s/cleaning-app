@@ -95,7 +95,16 @@ export function RoomListBox({
           <TableRow
             key={`${room.property_id}-${room.room_number}-${index}`}
             className="cursor-pointer hover:bg-gray-50"
-            onClick={() => navigate(`/rooms/${room.property_id}`)}
+            onClick={() => {
+              // セッションストレージに選択された部屋の情報を保存
+              const selectedRoom = {
+                property_id: room.property_id,
+                room_number: room.room_number,
+                timestamp: Date.now()
+              };
+              sessionStorage.setItem('selected_room_info', JSON.stringify(selectedRoom));
+              navigate('/rooms');
+            }}
           >
             <TableCell>{room.vacancy_date}</TableCell>
             <TableCell>{room.cleaning_deadline}</TableCell>
