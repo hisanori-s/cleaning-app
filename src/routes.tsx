@@ -1,6 +1,6 @@
 import { Route, Routes as RouterRoutes } from 'react-router-dom';
 import DashboardPage from './pages/dashboard/page';
-import RoomDetailPage from './pages/rooms/[id]/page';
+import RoomDetailPage from './pages/rooms/page';
 import ReportFormPage from './pages/rooms/[id]/report/page';
 import LoginPage from './pages/auth/page';
 

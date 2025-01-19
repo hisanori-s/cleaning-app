@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button } from '../../../components/ui/button';
-import { PropertyInfoBox } from '../../../components/room-detail/property-info-box/property-info-box';
-import { RoomInfoBox } from '../../../components/room-detail/room-info-box/room-info-box';
-import { getRoomDetails, getRoomCleaningHistory } from '../../../api/wordpress';
-import type { Room, CleaningReport } from '../../../types';
+import { Button } from '../../components/ui/button';
+import { PropertyInfoBox } from '../../components/room-detail/property-info-box/property-info-box';
+import { RoomInfoBox } from '../../components/room-detail/room-info-box/room-info-box';
+import { getRoomDetails, getRoomCleaningHistory } from '../../api/wordpress';
+import type { Room, CleaningReport } from '../../types';
 
 // 清掃履歴コンポーネント
 function CleaningHistory({ history }: { history: CleaningReport[] }) {
