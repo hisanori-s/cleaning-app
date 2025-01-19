@@ -1,26 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardHeader, CardTitle, CardContent } from '../../ui/card';
 import { getRoomDetails } from '../../../api/wordpress';
 import type { RoomDetail } from '../../../types/room-detail';
 import type { ApiResponse } from '../../../types/api';
-import { PropertyInfoBox } from '../property-info-box/property-info-box';
-import { RoomInfoBox } from '../room-info-box/room-info-box';
 
 interface RoomDetailFetchProps {
   onDataLoaded?: (room: RoomDetail | null) => void;
   onError?: (error: Error) => void;
+  render: (props: { room: RoomDetail }) => React.ReactNode;
 }
 
 interface SelectedRoomInfo {
   property_id: number;
   room_number: string;
   timestamp: number;
-}
-
-interface DebugInfo {
-  sessionData: SelectedRoomInfo | null;
-  apiResponse: ApiResponse<RoomDetail> | { error: string } | null;
 }
 
 // セッションストレージから選択された部屋の情報を取得
@@ -42,19 +35,14 @@ const getSelectedRoom = (): SelectedRoomInfo | null => {
   }
 };
 
-export function RoomDetailFetch({ onDataLoaded, onError }: RoomDetailFetchProps) {
+export function RoomDetailFetch({ onDataLoaded, onError, render }: RoomDetailFetchProps) {
   const navigate = useNavigate();
   const [room, setRoom] = useState<RoomDetail | null>(null);
   const [loading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [debugInfo, setDebugInfo] = useState<DebugInfo>({
-    sessionData: null,
-    apiResponse: null
-  });
 
   useEffect(() => {
     const selectedRoom = getSelectedRoom();
-    setDebugInfo(prev => ({ ...prev, sessionData: selectedRoom }));
 
     if (!selectedRoom) {
       navigate('/');
@@ -67,7 +55,6 @@ export function RoomDetailFetch({ onDataLoaded, onError }: RoomDetailFetchProps)
           selectedRoom.property_id,
           selectedRoom.room_number
         );
-        setDebugInfo(prev => ({ ...prev, apiResponse: roomResponse }));
         
         if (roomResponse.success && roomResponse.data) {
           setRoom(roomResponse.data);
@@ -81,10 +68,6 @@ export function RoomDetailFetch({ onDataLoaded, onError }: RoomDetailFetchProps)
         const errorObj = error instanceof Error ? error : new Error('不明なエラーが発生しました');
         setError(errorObj);
         onError?.(errorObj);
-        setDebugInfo(prev => ({ 
-          ...prev, 
-          apiResponse: { error: errorObj.message } 
-        }));
       } finally {
         setIsLoading(false);
       }
@@ -92,37 +75,6 @@ export function RoomDetailFetch({ onDataLoaded, onError }: RoomDetailFetchProps)
 
     fetchRoomData();
   }, [navigate, onDataLoaded, onError]);
-
-  // デバッグ情報の表示（開発環境のみ）
-  const renderDebugInfo = () => (
-    <Card className="mt-6 bg-gray-50">
-      <CardHeader>
-        <CardTitle className="text-sm">デバッグ情報</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4 text-xs font-mono">
-        <div>
-          <div className="font-bold mb-1">セッションストレージの情報:</div>
-          <pre className="bg-white p-2 rounded">
-            {JSON.stringify(debugInfo.sessionData, null, 2)}
-          </pre>
-        </div>
-        <div>
-          <div className="font-bold mb-1">API レスポンス:</div>
-          <pre className="bg-white p-2 rounded">
-            {JSON.stringify(debugInfo.apiResponse, null, 2)}
-          </pre>
-        </div>
-        {error && (
-          <div>
-            <div className="font-bold mb-1 text-red-600">エラー情報:</div>
-            <pre className="bg-white p-2 rounded text-red-600">
-              {error.message}
-            </pre>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
 
   if (loading) {
     return (
@@ -134,21 +86,11 @@ export function RoomDetailFetch({ onDataLoaded, onError }: RoomDetailFetchProps)
 
   if (error || !room) {
     return (
-      <div>
-        <div className="text-center text-red-600">
-          {error?.message || '部屋が見つかりませんでした'}
-        </div>
-        {process.env.NODE_ENV === 'development' && renderDebugInfo()}
+      <div className="text-center text-red-600">
+        {error?.message || '部屋が見つかりませんでした'}
       </div>
     );
   }
 
-  return (
-    <div className="space-y-6">
-        ここが二重表示の根源？表示機能は不要なんですが。
-      <PropertyInfoBox room={room} />
-      <RoomInfoBox room={room} />
-      {process.env.NODE_ENV === 'development' && renderDebugInfo()}
-    </div>
-  );
+  return <>{render({ room })}</>;
 } 
