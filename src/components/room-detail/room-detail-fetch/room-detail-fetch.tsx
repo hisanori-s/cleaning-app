@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getRoomDetails } from '../../../api/wordpress';
 import type { RoomDetail } from '../../../types/room-detail';
-import type { ApiResponse } from '../../../types/api';
 
 interface RoomDetailFetchProps {
   onDataLoaded?: (room: RoomDetail | null) => void;
@@ -91,6 +90,9 @@ export function RoomDetailFetch({ onDataLoaded, onError, render }: RoomDetailFet
       </div>
     );
   }
-
+  
+  if (!render || typeof render !== 'function') {
+    return null;  // または適切なエラーメッセージ
+  }
   return <>{render({ room })}</>;
 } 
