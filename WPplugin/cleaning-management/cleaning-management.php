@@ -9,83 +9,61 @@
 
 defined('ABSPATH') or die('Direct access not allowed.');
 
-// 必要なファイルの読み込み
-require_once plugin_dir_path(__FILE__) . 'includes/api/class-users-controller.php';
-require_once plugin_dir_path(__FILE__) . 'includes/api/class-properties-controller.php';
-require_once plugin_dir_path(__FILE__) . 'includes/api/class-reports-controller.php';
-require_once plugin_dir_path(__FILE__) . 'includes/api/class-auth-controller.php';
 
-// プラグインの初期化
-function cleaning_management_init() {
-    // APIコントローラーの登録
-    $users_controller = new Cleaning_Management_Users_Controller();
-    $users_controller->register_routes();
+// メインファイル：
+// env.php読み込み
+// 照合用関数記述
+// 各エンドポイントファイル読み込み
 
-    $properties_controller = new Cleaning_Management_Properties_Controller();
-    $properties_controller->register_routes();
+// 各エンドポイント：
+// エンドポイント返り値の作成。照合は外に投げる
 
-    $reports_controller = new Cleaning_Management_Reports_Controller();
-    $reports_controller->register_routes();
+// env.php：
+// シークレットキー管理
 
-    $auth_controller = new Cleaning_Management_Auth_Controller();
-    $auth_controller->register_routes();
+
+// 環境設定ファイルからシークレットキーを取得する
+function get_cleaning_management_config($key = null) {
+    static $config = null;
+    if ($config === null) {
+        // 環境設定ファイルの読み込み処理を直接ここに組み込む
+        $env_file = plugin_dir_path(__FILE__) . 'env.php';
+        if (file_exists($env_file)) {
+            $config = include $env_file;
+        } else {
+            $config = ['api_secret' => ''];
+            error_log('Cleaning Management Plugin: env.php file not found.');
+        }
+    }
+    
+    // 設定値の返却
+    if ($key === null) {
+        return $config;
+    }
+    return isset($config[$key]) ? $config[$key] : null;
 }
 
-// REST APIの初期化時にプラグインを初期化
-add_action('rest_api_init', 'cleaning_management_init');
+// 共用の認証チェック関数
+function check_api_permission($request) {
+    $auth_header = $request->get_header('Authorization'); // リクエストからAuthorizationヘッダーを取得
+    if (empty($auth_header) || strpos($auth_header, 'Bearer ') !== 0) {
+        return false;                                    // ヘッダーがないか形式が違えばfalse
+    }
 
-// プラグイン有効化時の処理
-register_activation_hook(__FILE__, 'cleaning_management_activate');
-function cleaning_management_activate() {
-    global $wpdb;
-    $charset_collate = $wpdb->get_charset_collate();
-    
-    // 物件テーブル
-    $properties_table = $wpdb->prefix . 'cleaning_properties';
-    $sql = "CREATE TABLE IF NOT EXISTS $properties_table (
-        id bigint(20) NOT NULL AUTO_INCREMENT,
-        name varchar(255) NOT NULL,
-        address text NOT NULL,
-        created_at datetime DEFAULT CURRENT_TIMESTAMP,
-        updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        PRIMARY KEY  (id)
-    ) $charset_collate;";
-    
-    // 部屋テーブル
-    $rooms_table = $wpdb->prefix . 'cleaning_rooms';
-    $sql .= "CREATE TABLE IF NOT EXISTS $rooms_table (
-        id bigint(20) NOT NULL AUTO_INCREMENT,
-        property_id bigint(20) NOT NULL,
-        room_number varchar(50) NOT NULL,
-        vacancy_date date NOT NULL,
-        cleaning_deadline date NOT NULL,
-        room_key_number varchar(50) NOT NULL,
-        entrance_key_number varchar(50) NOT NULL,
-        notes text,
-        created_at datetime DEFAULT CURRENT_TIMESTAMP,
-        updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        PRIMARY KEY  (id),
-        FOREIGN KEY (property_id) REFERENCES $properties_table(id)
-    ) $charset_collate;";
-    
-    // レポートテーブル
-    $reports_table = $wpdb->prefix . 'cleaning_reports';
-    $sql .= "CREATE TABLE IF NOT EXISTS $reports_table (
-        id bigint(20) NOT NULL AUTO_INCREMENT,
-        room_id bigint(20) NOT NULL,
-        staff_id bigint(20) NOT NULL,
-        created_at datetime DEFAULT CURRENT_TIMESTAMP,
-        updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        PRIMARY KEY  (id),
-        FOREIGN KEY (room_id) REFERENCES $rooms_table(id)
-    ) $charset_collate;";
-    
-    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-    dbDelta($sql);
+    $provided_secret = trim(substr($auth_header, 7));    // 'Bearer 'の後ろの部分を取得
+    $stored_secret = get_cleaning_management_config('api_secret'); // env.phpの設定値を取得
+
+    return $provided_secret === $stored_secret;          // 両者を比較して結果を返す
 }
 
-// プラグイン無効化時の処理
-register_deactivation_hook(__FILE__, 'cleaning_management_deactivate');
-function cleaning_management_deactivate() {
-    // 必要に応じて無効化時の処理を追加
-} 
+// エンドポイントファイルの読み込み
+// 同階層のapiディレクトリの中身を自動取得
+$api_dir = plugin_dir_path(__FILE__) . 'api/';
+if (is_dir($api_dir)) {
+    $files = scandir($api_dir);
+    foreach ($files as $file) {
+        if (strpos($file, 'class-') === 0 && strpos($file, '.php') !== false) {
+            require_once $api_dir . $file;
+        }
+    }
+}

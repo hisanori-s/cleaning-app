@@ -1,6 +1,14 @@
 import { User, RoomDetail, CleaningReport, ApiResponse } from '../types/index';
 import roomDetailMock from '../__tests__/mocks/api/room-detail.json';
 
+// エンドポイントの型
+// fetch('https://your-site.com/wp-json/cleaning-management/v1/users', {
+//   headers: {
+//       'Authorization': 'Bearer your-secret-here'  // ここにシークレットを含める
+//   }
+// })
+
+
 const API_BASE_URL = import.meta.env.VITE_WP_API_BASE_URL;
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
 const IS_MOCK = IS_DEVELOPMENT || import.meta.env.VITE_USE_MOCK === 'true';
