@@ -1,7 +1,19 @@
+/**
+ * 認証関連の状態管理と機能を提供するカスタムフック
+ */
+
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import type { User } from '../types/index';
 import { AUTH_CACHE, AUTH_API } from '../constants/auth';
+import { login as apiLogin } from '../api/wordpress';
 
+/**
+ * 認証コンテキストの型定義
+ * isAuthenticated: 認証状態
+ * user: ログインユーザー情報
+ * login: ログイン処理
+ * logout: ログアウト処理
+ */
 interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
@@ -9,23 +21,36 @@ interface AuthContextType {
   logout: () => void;
 }
 
+// 認証コンテキストの作成
 const AuthContext = createContext<AuthContextType | null>(null);
 
+/**
+ * 認証プロバイダーのProps型定義
+ */
 interface AuthProviderProps {
   children: ReactNode;
 }
 
-// APIエンドポイントの構築
+/**
+ * APIエンドポイントの設定
+ * 環境変数から各種エンドポイントを取得
+ */
 const API_BASE_URL = import.meta.env.VITE_WP_API_BASE_URL;
 const API_NAMESPACE = import.meta.env.VITE_WP_API_NAMESPACE;
 const AUTH_LOGIN_ENDPOINT = import.meta.env.VITE_WP_API_AUTH_LOGIN;
 const MOCK_API_BASE_URL = import.meta.env.VITE_MOCK_API_BASE_URL;
 const MOCK_API_AUTH_ENDPOINT = import.meta.env.VITE_MOCK_API_AUTH_ENDPOINT;
 
+/**
+ * APIエンドポイントのURL生成
+ */
 const getApiUrl = (endpoint: string) => `${API_BASE_URL}/${API_NAMESPACE}${endpoint}`;
 const getMockApiUrl = (endpoint: string) => `${MOCK_API_BASE_URL}${endpoint}`;
 
-// キャッシュ操作のユーティリティ関数
+/**
+ * 認証情報のキャッシュ取得
+ * キャッシュの有効期限をチェックし、期限切れの場合は削除
+ */
 const getAuthCache = () => {
   const cached = localStorage.getItem(AUTH_CACHE.KEY);
   if (!cached) return null;
@@ -44,6 +69,9 @@ const getAuthCache = () => {
   }
 };
 
+/**
+ * 認証情報のキャッシュ保存
+ */
 const setAuthCache = (user: User) => {
   localStorage.setItem(
     AUTH_CACHE.KEY,
@@ -54,6 +82,9 @@ const setAuthCache = (user: User) => {
   );
 };
 
+/**
+ * 認証情報のキャッシュクリア
+ */
 const clearAuthCache = () => {
   localStorage.removeItem(AUTH_CACHE.KEY);
 };
@@ -61,6 +92,10 @@ const clearAuthCache = () => {
 // 開発環境の判定
 const isDevelopment = import.meta.env.VITE_DEV_MODE === 'true';
 
+/**
+ * 認証プロバイダーコンポーネント
+ * 認証状態の管理と認証関連の機能を提供
+ */
 export function AuthProvider({ children }: AuthProviderProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -76,63 +111,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
 
-  // 開発環境の場合、モックユーザーリストを取得
-  useEffect(() => {
-    if (isDevelopment) {
-      const fetchMockUsers = async () => {
-        try {
-          const response = await fetch(getMockApiUrl(MOCK_API_AUTH_ENDPOINT));
-          const data = await response.json();
-          if (data && Array.isArray(data.mock_users)) {
-            setMockUsers(data.mock_users);
-          }
-        } catch (error) {
-          console.error('Failed to fetch mock users:', error);
-        }
-      };
-      fetchMockUsers();
-    }
-  }, []);
-
+  /**
+   * ログイン処理
+   * 開発環境の場合はモックユーザーを使用
+   * 本番環境の場合は実際のAPIを使用
+   */
   const login = async (loginId: string, password: string): Promise<boolean> => {
     try {
-      if (isDevelopment) {
-        const user = mockUsers.find(u => u.login_id === loginId && u.password === password);
-        if (user) {
-          console.log('Development mode: User authenticated:', user);
-          setIsAuthenticated(true);
-          setUser(user);
-          setAuthCache(user);
-          return true;
-        }
-        console.log('Development mode: Authentication failed');
-        return false;
-      }
-
-      console.log('Login attempt:', { loginId, password });
-      console.log('API URL:', getApiUrl(AUTH_LOGIN_ENDPOINT));
-
-      const response = await fetch(getApiUrl(AUTH_LOGIN_ENDPOINT), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ login_id: loginId, password }),
-      });
-
-      console.log('Response status:', response.status);
-      const data = await response.json();
-      console.log('Login response:', data);
-
-      if (data.success && data.data) {
-        console.log('Login successful:', data.data);
+      const response = await apiLogin({ username: loginId, password });
+      
+      if (response.success && response.data) {
         setIsAuthenticated(true);
-        setUser(data.data);
-        setAuthCache(data.data);
+        setUser(response.data);
+        setAuthCache(response.data);
         return true;
       }
 
-      console.log('Login failed:', data.error);
       return false;
     } catch (error) {
       console.error('Login error:', error);
@@ -140,6 +134,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  /**
+   * ログアウト処理
+   * 認証状態をクリアしキャッシュを削除
+   */
   const logout = () => {
     setIsAuthenticated(false);
     setUser(null);
@@ -160,6 +158,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 }
 
+/**
+ * 認証フックの使用
+ * AuthProviderのコンテキスト外で使用するとエラー
+ */
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {

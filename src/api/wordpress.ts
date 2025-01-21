@@ -8,10 +8,12 @@ import roomDetailMock from '../__tests__/mocks/api/room-detail.json';
 //   }
 // })
 
-
+// APIエンドポイントの設定
 const API_BASE_URL = import.meta.env.VITE_WP_API_BASE_URL;
+const API_NAMESPACE = import.meta.env.VITE_WP_API_NAMESPACE;
 const API_USERS_ENDPOINT = import.meta.env.VITE_WP_API_USERS_ENDPOINT;
 const API_KEY = import.meta.env.VITE_WP_API_KEY;
+const AUTH_LOGIN_ENDPOINT = import.meta.env.VITE_WP_API_AUTH_LOGIN;
 // 開発環境判定は他の機能で必要な場合があるため残す
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
 
@@ -35,7 +37,6 @@ class ApiError extends Error {
 interface MockDataProvider {
   getRoomDetail: (propertyId: number, roomNumber: string) => ApiResponse<RoomDetail>;
   getRooms: () => ApiResponse<RoomDetail[]>;
-  getUsers: () => ApiResponse<User[]>;
 }
 
 /**
@@ -49,29 +50,7 @@ const defaultMockProvider: MockDataProvider = {
   getRooms: () => ({
     success: true,
     data: [roomDetailMock.mock_room_detail]
-  }),
-  // ユーザー情報のモックは一時的に無効化（本番APIを使用）
-  // getUsers: () => ({
-  //   success: true,
-  //   data: [
-  //     {
-  //       login_id: "sample456",
-  //       password: "1234",
-  //       house_ids: [3056, 13, 9600, 25],
-  //       name: "サンプル業者２"
-  //     },
-  //     {
-  //       login_id: "sample123",
-  //       password: "1234",
-  //       house_ids: [28570, 20861, 17924, 17124, 10, 10588],
-  //       name: "サンプル業者"
-  //     }
-  //   ]
-  // })
-  // 本番APIを使用するためのダミー実装
-  getUsers: () => {
-    throw new Error('Mock is disabled, using production API');
-  }
+  })
 };
 
 interface LoginCredentials {
@@ -82,24 +61,27 @@ interface LoginCredentials {
 class WordPressApiClient {
   private token: string | null = null;
 
+  /**
+   * ログイン処理
+   * @param credentials ログイン情報
+   */
   async login(credentials: LoginCredentials): Promise<ApiResponse<User>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/${API_NAMESPACE}${AUTH_LOGIN_ENDPOINT}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': API_KEY || 'test123'
+        },
+        body: JSON.stringify({
+          login_id: credentials.username,
+          password: credentials.password
+        }),
       });
 
-      const data = await this.handleResponse<{ token: string; user: User }>(response);
-      this.token = data.data?.token || null;
-      return {
-        success: true,
-        data: data.data?.user
-      };
+      return this.handleResponse<User>(response);
     } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
+      console.error('Login error:', error);
       throw new ApiError(
         'Login failed',
         'LOGIN_ERROR',
