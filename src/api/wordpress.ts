@@ -4,14 +4,14 @@ import roomDetailMock from '../__tests__/mocks/api/room-detail.json';
 // エンドポイントの型
 // fetch('https://your-site.com/wp-json/cleaning-management/v1/users', {
 //   headers: {
-//       'Authorization': 'Bearer your-secret-here'  // ここにシークレットを含める
+//       'X-API-Key': 'test123'  // APIキー認証
 //   }
 // })
 
 
 const API_BASE_URL = import.meta.env.VITE_WP_API_BASE_URL;
 const API_USERS_ENDPOINT = import.meta.env.VITE_WP_API_USERS_ENDPOINT;
-const API_SECRET = import.meta.env.VITE_WP_API_SECRET;
+const API_KEY = import.meta.env.VITE_WP_API_KEY;
 // 開発環境判定は他の機能で必要な場合があるため残す
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
 
@@ -222,8 +222,7 @@ class WordPressApiClient {
     try {
       const response = await fetch(requestUrl, {
         method: 'GET',
-        headers: this.getHeaders(),
-        credentials: 'include'
+        headers: this.getHeaders()
       });
       
       return await this.handleResponse<User[]>(response);
@@ -239,11 +238,35 @@ class WordPressApiClient {
       );
     }
   }
+// サンプルのAPIコールここから
+async getHello(): Promise<ApiResponse<{ message: string }>> {
+  const requestUrl = `${API_BASE_URL}${import.meta.env.VITE_WP_API_SAMPLE_ENDPOINT}`;
+  console.log('Requesting hello from:', requestUrl);
+  console.log('Using headers:', this.getHeaders()); // デバッグ用
 
+  try {
+    const response = await fetch(requestUrl, {
+      method: 'GET',
+      headers: this.getHeaders(),
+    });
+    
+    return await this.handleResponse<{ message: string }>(response);
+  } catch (error) {
+    console.error('Hello API Request failed:', error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(
+      'Failed to fetch hello',
+      'FETCH_ERROR',
+      500
+    );
+  }
+}
+// サンプルのAPIコールここまで
   private getHeaders(isFormData = false): HeadersInit {
     const headers: HeadersInit = {
-      'Accept': 'application/json',
-      'Authorization': `Bearer ${API_SECRET}`
+      'X-API-Key': API_KEY || 'test123'
     };
     
     // Content-Typeヘッダーの設定
@@ -303,6 +326,7 @@ class WordPressApiClient {
 const client = new WordPressApiClient();
 
 // APIメソッドのエクスポート
+export const getHello = () => client.getHello();
 export const getUsers = () => client.getUsers();
 export const login = (credentials: LoginCredentials) => client.login(credentials);
 export const logout = () => client.logout();

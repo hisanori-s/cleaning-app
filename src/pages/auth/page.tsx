@@ -4,7 +4,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
 import { useAuth } from '../../hooks/use-auth';
-import { getUsers } from '../../api/wordpress';
+import { getUsers, getHello } from '../../api/wordpress';
 import type { User } from '../../types/user';
 
 // キャッシュ関連の定数
@@ -51,6 +51,7 @@ export default function LoginPage() {
     foundUser?: User | null;
     error?: any;
     rawResponse?: string;
+    helloApiResponse?: { message: string };
   }>({
     loadingState: 'ユーザーリスト取得中...'
   });
@@ -101,6 +102,44 @@ export default function LoginPage() {
 
     fetchUserList();
     return () => { isMounted = false; };
+  }, []);
+
+  // Hello APIを呼び出す
+  useEffect(() => {
+    const fetchHello = async () => {
+      try {
+        setDebugInfo(prev => ({
+          ...prev,
+          loadingState: 'Hello APIリクエスト送信中...'
+        }));
+
+        const response = await getHello();
+        console.log('Hello API Response:', response);
+
+        if (response.success && response.data) {
+          setDebugInfo(prev => ({
+            ...prev,
+            helloApiResponse: response.data,
+            loadingState: 'Hello API取得完了',
+            rawResponse: JSON.stringify({
+              ...prev.rawResponse && { previousResponse: JSON.parse(prev.rawResponse) },
+              helloApi: response.data
+            }, null, 2)
+          }));
+        } else {
+          throw new Error('Hello APIの取得に失敗しました');
+        }
+      } catch (error) {
+        console.error('Failed to fetch hello:', error);
+        setDebugInfo(prev => ({
+          ...prev,
+          error: error,
+          loadingState: 'Hello APIでエラーが発生: ' + (error instanceof Error ? error.message : String(error))
+        }));
+      }
+    };
+
+    fetchHello();
   }, []);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -229,6 +268,13 @@ export default function LoginPage() {
                 <>
                   <h3 className="font-bold mb-2">生のレスポンス:</h3>
                   <pre>{debugInfo.rawResponse}</pre>
+                </>
+              )}
+
+              {debugInfo.helloApiResponse && (
+                <>
+                  <h3 className="font-bold mb-2">Hello APIレスポンス:</h3>
+                  <pre>{JSON.stringify(debugInfo.helloApiResponse, null, 2)}</pre>
                 </>
               )}
             </div>

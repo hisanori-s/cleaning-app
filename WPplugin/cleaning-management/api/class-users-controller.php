@@ -44,3 +44,30 @@ function get_users_data() {
             'Content-Type' => 'application/json; charset=utf-8'
         ));
 }
+
+/*
+テストエンドポイント
+*/
+
+
+// エンドポイントの登録
+add_action('rest_api_init', 'register_hello_endpoint');
+
+function register_hello_endpoint() {
+    register_rest_route(
+        'cleaning-management/v1',
+        '/sample-hello',
+        array(
+            'methods' => 'GET',
+            'callback' => 'get_hello_response',
+            // 'permission_callback' => 'verify_api_key'  // 変更箇所
+            'permission_callback' => '__return_true'
+        )
+    );
+}
+
+function get_hello_response() {
+    return new WP_REST_Response(array(
+        'message' => 'hello world'
+    ), 200);
+}
