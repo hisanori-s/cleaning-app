@@ -5,9 +5,12 @@
  * - src/app.tsx (ユーザーメニューの表示)
  */
 export interface User {
-  id: number;
-  username: string;
-  email: string;
-  role: 'cleaner';
-  assigned_rooms: number[];
+  /** ログインID */
+  login_id: string;
+  /** パスワード */
+  password: string;
+  /** 担当物件ID配列 */
+  house_ids: number[];
+  /** 表示名 */
+  name: string;
 } 

@@ -10,8 +10,10 @@ import roomDetailMock from '../__tests__/mocks/api/room-detail.json';
 
 
 const API_BASE_URL = import.meta.env.VITE_WP_API_BASE_URL;
+const API_USERS_ENDPOINT = import.meta.env.VITE_WP_API_USERS_ENDPOINT;
+const API_SECRET = import.meta.env.VITE_WP_API_SECRET;
+// 開発環境判定は他の機能で必要な場合があるため残す
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
-const IS_MOCK = IS_DEVELOPMENT || import.meta.env.VITE_USE_MOCK === 'true';
 
 /**
  * APIエラーを表現するカスタムエラークラス
@@ -33,6 +35,7 @@ class ApiError extends Error {
 interface MockDataProvider {
   getRoomDetail: (propertyId: number, roomNumber: string) => ApiResponse<RoomDetail>;
   getRooms: () => ApiResponse<RoomDetail[]>;
+  getUsers: () => ApiResponse<User[]>;
 }
 
 /**
@@ -46,7 +49,29 @@ const defaultMockProvider: MockDataProvider = {
   getRooms: () => ({
     success: true,
     data: [roomDetailMock.mock_room_detail]
-  })
+  }),
+  // ユーザー情報のモックは一時的に無効化（本番APIを使用）
+  // getUsers: () => ({
+  //   success: true,
+  //   data: [
+  //     {
+  //       login_id: "sample456",
+  //       password: "1234",
+  //       house_ids: [3056, 13, 9600, 25],
+  //       name: "サンプル業者２"
+  //     },
+  //     {
+  //       login_id: "sample123",
+  //       password: "1234",
+  //       house_ids: [28570, 20861, 17924, 17124, 10, 10588],
+  //       name: "サンプル業者"
+  //     }
+  //   ]
+  // })
+  // 本番APIを使用するためのダミー実装
+  getUsers: () => {
+    throw new Error('Mock is disabled, using production API');
+  }
 };
 
 interface LoginCredentials {
@@ -99,7 +124,7 @@ class WordPressApiClient {
   }
 
   async getRooms(): Promise<ApiResponse<RoomDetail[]>> {
-    if (IS_MOCK) {
+    if (IS_DEVELOPMENT) {
       return defaultMockProvider.getRooms();
     }
 
@@ -121,7 +146,7 @@ class WordPressApiClient {
   }
 
   async getRoom(propertyId: number, roomNumber: string): Promise<ApiResponse<RoomDetail>> {
-    if (IS_MOCK) {
+    if (IS_DEVELOPMENT) {
       return defaultMockProvider.getRoomDetail(propertyId, roomNumber);
     }
 
@@ -185,49 +210,100 @@ class WordPressApiClient {
     }
   }
 
-  private getHeaders(isFormData = false): HeadersInit {
-    if (!this.token) {
+  /**
+   * ユーザー情報を取得する
+   * @returns Promise<ApiResponse<User[]>>
+   */
+  async getUsers(): Promise<ApiResponse<User[]>> {
+    const requestUrl = `${API_BASE_URL}${API_USERS_ENDPOINT}`;
+    console.log('Requesting users from:', requestUrl);
+    console.log('Request headers:', this.getHeaders());
+
+    try {
+      const response = await fetch(requestUrl, {
+        method: 'GET',
+        headers: this.getHeaders(),
+        credentials: 'include'
+      });
+      
+      return await this.handleResponse<User[]>(response);
+    } catch (error) {
+      console.error('API Request failed:', error);
+      if (error instanceof ApiError) {
+        throw error;
+      }
       throw new ApiError(
-        'Authentication token is missing',
-        'AUTH_REQUIRED',
-        401
+        'Failed to fetch users',
+        'FETCH_ERROR',
+        500
       );
     }
+  }
 
+  private getHeaders(isFormData = false): HeadersInit {
     const headers: HeadersInit = {
-      Authorization: `Bearer ${this.token}`,
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${API_SECRET}`
     };
+    
+    // Content-Typeヘッダーの設定
     if (!isFormData) {
       headers['Content-Type'] = 'application/json';
     }
+    
     return headers;
   }
 
   private async handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
+    // エラーレスポンスの詳細なログ
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({
-        code: 'UNKNOWN_ERROR',
-        message: response.statusText
-      }));
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+        body: errorText
+      });
+
+      let errorMessage = 'API request failed';
+      let errorCode = 'API_ERROR';
+
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.message || errorMessage;
+        errorCode = errorData.code || errorCode;
+      } catch (e) {
+        console.warn('Failed to parse error response:', e);
+      }
 
       throw new ApiError(
-        errorData.message || 'API request failed',
-        errorData.code || 'API_ERROR',
+        errorMessage,
+        errorCode,
         response.status
       );
     }
 
-    const data = await response.json();
-    return {
-      success: true,
-      data: data as T
-    };
+    try {
+      const data = await response.json();
+      return {
+        success: true,
+        data: data as T
+      };
+    } catch (error) {
+      console.error('Failed to parse response:', error);
+      throw new ApiError(
+        'Invalid response format',
+        'PARSE_ERROR',
+        500
+      );
+    }
   }
 }
 
 const client = new WordPressApiClient();
 
 // APIメソッドのエクスポート
+export const getUsers = () => client.getUsers();
 export const login = (credentials: LoginCredentials) => client.login(credentials);
 export const logout = () => client.logout();
 export const getRooms = () => client.getRooms();

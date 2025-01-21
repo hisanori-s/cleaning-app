@@ -4,31 +4,8 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
 import { useAuth } from '../../hooks/use-auth';
-
-// API設定の定数
-const MOCK_API_BASE_URL = import.meta.env.VITE_MOCK_API_BASE_URL;
-const MOCK_API_AUTH_ENDPOINT = import.meta.env.VITE_MOCK_API_AUTH_ENDPOINT;
-
-interface MockUser {
-  id: number;
-  login_id: string;
-  password: string;
-  username: string;
-  email: string;
-  role: string;
-  assigned_rooms: number[];
-}
-
-interface DebugInfo {
-  userList?: MockUser[];
-  userListError?: any;
-  attemptedLogin?: { login_id: string; password: string };
-  foundUser?: MockUser | null;
-  error?: any;
-  loadingState?: string;
-  requestUrl?: string;
-  rawResponse?: string;
-}
+import { getUsers } from '../../api/wordpress';
+import type { User } from '../../types/user';
 
 // キャッシュ関連の定数
 const AUTH_CACHE_KEY = 'auth_user';
@@ -48,7 +25,7 @@ const getAuthCache = () => {
   return data;
 };
 
-const setAuthCache = (user: MockUser) => {
+const setAuthCache = (user: User) => {
   localStorage.setItem(
     AUTH_CACHE_KEY,
     JSON.stringify({
@@ -58,14 +35,6 @@ const setAuthCache = (user: MockUser) => {
   );
 };
 
-// APIパスを構築する関数
-const getMockApiUrl = (endpoint: string) => {
-  const baseUrl = MOCK_API_BASE_URL.startsWith('.') 
-    ? new URL(MOCK_API_BASE_URL, window.location.href).pathname
-    : MOCK_API_BASE_URL;
-  return `${baseUrl}${endpoint}`;
-};
-
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -73,8 +42,16 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [userList, setUserList] = useState<MockUser[]>([]);
-  const [debugInfo, setDebugInfo] = useState<DebugInfo>({
+  const [userList, setUserList] = useState<User[]>([]);
+  const [debugInfo, setDebugInfo] = useState<{
+    loadingState?: string;
+    requestUrl?: string;
+    userList?: User[];
+    attemptedLogin?: { login_id: string; password: string };
+    foundUser?: User | null;
+    error?: any;
+    rawResponse?: string;
+  }>({
     loadingState: 'ユーザーリスト取得中...'
   });
 
@@ -84,54 +61,39 @@ export default function LoginPage() {
 
     const fetchUserList = async () => {
       try {
+        // APIエンドポイント
+        // 注: 本番環境では以下のヘッダーが必要
+        // headers: {
+        //   'Authorization': 'Bearer ${import.meta.env.VITE_WP_API_SECRET}'
+        // }
+        const apiEndpoint = `${import.meta.env.VITE_WP_API_BASE_URL}${import.meta.env.VITE_WP_API_USERS_ENDPOINT}`;
+        
         setDebugInfo(prev => ({ 
           ...prev, 
           loadingState: 'APIリクエスト送信中...',
-          requestUrl: getMockApiUrl(MOCK_API_AUTH_ENDPOINT)
+          requestUrl: apiEndpoint
         }));
-        
-        const apiUrl = getMockApiUrl(MOCK_API_AUTH_ENDPOINT);
-        console.log('Requesting API:', apiUrl);
 
-        const response = await fetch(apiUrl);
+        const response = await getUsers();
         if (!isMounted) return;
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error(`Invalid content type: ${contentType}`);
-        }
-
-        const text = await response.text();
-        console.log('Raw response:', text);
-
-        try {
-          const data = JSON.parse(text);
-          console.log('Parsed Data:', data);
-
-          if (data && Array.isArray(data.mock_users)) {
-            setUserList(data.mock_users);
-            setDebugInfo(prev => ({
-              ...prev,
-              userList: data.mock_users,
-              loadingState: 'ユーザーリスト取得完了',
-              rawResponse: text
-            }));
-          } else {
-            throw new Error('Invalid data format: mock_users array not found');
-          }
-        } catch (parseError) {
-          throw new Error(`JSON parse error: ${parseError.message}\nRaw text: ${text}`);
+        if (response.success && response.data) {
+          setUserList(response.data);
+          setDebugInfo(prev => ({
+            ...prev,
+            userList: response.data,
+            loadingState: 'ユーザーリスト取得完了',
+            rawResponse: JSON.stringify(response.data, null, 2)
+          }));
+        } else {
+          throw new Error('ユーザーリストの取得に失敗しました');
         }
       } catch (error) {
         if (!isMounted) return;
         console.error('Failed to fetch user list:', error);
         setDebugInfo(prev => ({
           ...prev,
-          userListError: error,
+          error: error,
           loadingState: 'エラーが発生しました: ' + (error instanceof Error ? error.message : String(error))
         }));
       }
@@ -230,7 +192,7 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        {/* デバッグ情報表示（常時表示） */}
+        {/* デバッグ情報表示 */}
         <Card>
           <CardHeader>
             <CardTitle>デバッグ情報</CardTitle>
