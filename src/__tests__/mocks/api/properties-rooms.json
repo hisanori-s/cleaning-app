@@ -1,7 +1,7 @@
 {
   "mock_rooms_list": [
     {
-      "property_id": 1,
+      "property_id": 10,
       "property_name": "シェアハウスA", 
       "room_number": "101",
       "vacancy_date": "2024-01-25",
@@ -12,7 +12,7 @@
       }
     },
     {
-      "property_id": 1,
+      "property_id": 10,
       "property_name": "シェアハウスA",
       "room_number": "102",
       "vacancy_date": "2024-02-05",
@@ -23,7 +23,7 @@
       }
     },
     {
-      "property_id": 1,
+      "property_id": 10,
       "property_name": "シェアハウスA",
       "room_number": "201",
       "vacancy_date": "2024-01-22",
