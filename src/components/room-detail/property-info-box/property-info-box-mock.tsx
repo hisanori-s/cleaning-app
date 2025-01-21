@@ -1,11 +1,11 @@
 import { Card, CardHeader, CardTitle, CardContent } from '../../ui/card';
 import type { RoomDetail } from '../../../types/room-detail';
 
-export interface PropertyInfoBoxProps {
+export interface PropertyInfoBoxMockProps {
   room: RoomDetail;
 }
 
-export function PropertyInfoBox({ room }: PropertyInfoBoxProps) {
+export function PropertyInfoBoxMock({ room }: PropertyInfoBoxMockProps) {
   return (
     <Card>
       <CardHeader>

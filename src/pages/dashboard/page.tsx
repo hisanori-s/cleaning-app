@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { MessageBox } from '@/components/dashboard/message-box/message-box';
-import { RoomListBox } from '@/components/dashboard/room-list-box/room-list-box';
+import { RoomListBoxMock } from '@/components/dashboard/room-list-box/room-list-box-mock';
 import type { Room, RoomListResponse } from '@/types/room';
 import mockData from '@/__tests__/mocks/api/properties-rooms.json';
 
@@ -58,16 +58,16 @@ export default function DashboardPage() {
       />
       
       {/* ステータスごとの部屋一覧 */}
-      <RoomListBox
-        title="ステータス別部屋一覧"
+      <RoomListBoxMock
+        title="【モック：このタイトルは表示されない】ステータス別部屋一覧"
         rooms={rooms}
         groupByStatus={true}
         onError={(error) => setError(error)}
       />
 
       {/* 全部屋一覧 */}
-      <RoomListBox
-        title="全部屋一覧"
+      <RoomListBoxMock
+        title="【モック】全部屋一覧"
         rooms={rooms}
         onError={(error) => setError(error)}
       />

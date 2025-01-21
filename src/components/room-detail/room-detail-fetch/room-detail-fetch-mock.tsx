@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getRoomDetails } from '../../../api/wordpress';
 import type { RoomDetail } from '../../../types/room-detail';
 
-interface RoomDetailFetchProps {
+interface RoomDetailFetchMockProps {
   onDataLoaded?: (room: RoomDetail | null) => void;
   onError?: (error: Error) => void;
   render: (props: { room: RoomDetail }) => React.ReactNode;
@@ -34,7 +34,7 @@ const getSelectedRoom = (): SelectedRoomInfo | null => {
   }
 };
 
-export function RoomDetailFetch({ onDataLoaded, onError, render }: RoomDetailFetchProps) {
+export function RoomDetailFetchMock({ onDataLoaded, onError, render }: RoomDetailFetchMockProps) {
   const navigate = useNavigate();
   const [room, setRoom] = useState<RoomDetail | null>(null);
   const [loading, setIsLoading] = useState(true);

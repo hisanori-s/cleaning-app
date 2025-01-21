@@ -1,11 +1,11 @@
 import { Card, CardHeader, CardTitle, CardContent } from '../../ui/card';
 import type { RoomDetail } from '../../../types/room-detail';
 
-export interface RoomInfoBoxProps {
+export interface RoomInfoBoxMockProps {
   room: RoomDetail;
 }
 
-export function RoomInfoBox({ room }: RoomInfoBoxProps) {
+export function RoomInfoBoxMock({ room }: RoomInfoBoxMockProps) {
   // 必須フィールドの存在チェック
   if (!room.property_name || !room.room_number) {
     return (

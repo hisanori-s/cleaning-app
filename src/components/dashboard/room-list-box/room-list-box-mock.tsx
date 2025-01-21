@@ -11,7 +11,7 @@ import {
 import type { Room } from '@/types/room';
 import { useMemo } from 'react';
 
-export interface RoomListBoxProps {
+export interface RoomListBoxMockProps {
   title: string;
   rooms: Room[];
   titleColor?: string;
@@ -25,13 +25,13 @@ interface StatusGroup {
   rooms: Room[];
 }
 
-export function RoomListBox({ 
+export function RoomListBoxMock({ 
   title, 
   rooms, 
   titleColor, 
   onError,
   groupByStatus = false 
-}: RoomListBoxProps) {
+}: RoomListBoxMockProps) {
   const navigate = useNavigate();
 
   // メモ化によるパフォーマンス最適化
@@ -148,7 +148,7 @@ export function RoomListBox({
                   className="flex items-center gap-2"
                   style={{ color: group.color }}
                 >
-                  {group.label}
+                  {`【モック】${group.label}`}
                   <span className="text-sm font-normal text-gray-500">
                     ({group.rooms.length}件)
                   </span>
