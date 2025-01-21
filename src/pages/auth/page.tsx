@@ -4,36 +4,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
 import { useAuth } from '../../hooks/use-auth';
-import { getUsers, getHello } from '../../api/wordpress';
-import type { User } from '../../types/user';
-
-// キャッシュ関連の定数
-const AUTH_CACHE_KEY = 'auth_user';
-const CACHE_DURATION = 1000 * 60 * 60 * 24; // 24時間
-
-// キャッシュ操作のユーティリティ関数
-const getAuthCache = () => {
-  const cached = localStorage.getItem(AUTH_CACHE_KEY);
-  if (!cached) return null;
-
-  const { data, timestamp } = JSON.parse(cached);
-  if (Date.now() - timestamp > CACHE_DURATION) {
-    localStorage.removeItem(AUTH_CACHE_KEY);
-    return null;
-  }
-
-  return data;
-};
-
-const setAuthCache = (user: User) => {
-  localStorage.setItem(
-    AUTH_CACHE_KEY,
-    JSON.stringify({
-      data: user,
-      timestamp: Date.now(),
-    })
-  );
-};
+import { getUsers } from '../../api/wordpress';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -42,104 +13,31 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [userList, setUserList] = useState<User[]>([]);
   const [debugInfo, setDebugInfo] = useState<{
-    loadingState?: string;
-    requestUrl?: string;
-    userList?: User[];
-    attemptedLogin?: { login_id: string; password: string };
-    foundUser?: User | null;
+    userList?: any[];
+    loginAttempt?: { id: string; success: boolean };
+    apiResponse?: any;
     error?: any;
-    rawResponse?: string;
-    helloApiResponse?: { message: string };
-  }>({
-    loadingState: 'ユーザーリスト取得中...'
-  });
+  }>({});
 
-  // コンポーネントマウント時にユーザーリストを即時取得
+  // ユーザーリスト取得のデバッグ用
   useEffect(() => {
-    let isMounted = true;
-
-    const fetchUserList = async () => {
+    const fetchDebugUsers = async () => {
       try {
-        // APIエンドポイント
-        // 注: 本番環境では以下のヘッダーが必要
-        // headers: {
-        //   'Authorization': 'Bearer ${import.meta.env.VITE_WP_API_SECRET}'
-        // }
-        const apiEndpoint = `${import.meta.env.VITE_WP_API_BASE_URL}${import.meta.env.VITE_WP_API_USERS_ENDPOINT}`;
-        
-        setDebugInfo(prev => ({ 
-          ...prev, 
-          loadingState: 'APIリクエスト送信中...',
-          requestUrl: apiEndpoint
-        }));
-
         const response = await getUsers();
-        if (!isMounted) return;
-
-        if (response.success && response.data) {
-          setUserList(response.data);
-          setDebugInfo(prev => ({
-            ...prev,
-            userList: response.data,
-            loadingState: 'ユーザーリスト取得完了',
-            rawResponse: JSON.stringify(response.data, null, 2)
-          }));
-        } else {
-          throw new Error('ユーザーリストの取得に失敗しました');
-        }
-      } catch (error) {
-        if (!isMounted) return;
-        console.error('Failed to fetch user list:', error);
         setDebugInfo(prev => ({
           ...prev,
-          error: error,
-          loadingState: 'エラーが発生しました: ' + (error instanceof Error ? error.message : String(error))
+          userList: response.data,
+          apiResponse: response
+        }));
+      } catch (error) {
+        setDebugInfo(prev => ({
+          ...prev,
+          error: error
         }));
       }
     };
-
-    fetchUserList();
-    return () => { isMounted = false; };
-  }, []);
-
-  // Hello APIを呼び出す
-  useEffect(() => {
-    const fetchHello = async () => {
-      try {
-        setDebugInfo(prev => ({
-          ...prev,
-          loadingState: 'Hello APIリクエスト送信中...'
-        }));
-
-        const response = await getHello();
-        console.log('Hello API Response:', response);
-
-        if (response.success && response.data) {
-          setDebugInfo(prev => ({
-            ...prev,
-            helloApiResponse: response.data,
-            loadingState: 'Hello API取得完了',
-            rawResponse: JSON.stringify({
-              ...prev.rawResponse && { previousResponse: JSON.parse(prev.rawResponse) },
-              helloApi: response.data
-            }, null, 2)
-          }));
-        } else {
-          throw new Error('Hello APIの取得に失敗しました');
-        }
-      } catch (error) {
-        console.error('Failed to fetch hello:', error);
-        setDebugInfo(prev => ({
-          ...prev,
-          error: error,
-          loadingState: 'Hello APIでエラーが発生: ' + (error instanceof Error ? error.message : String(error))
-        }));
-      }
-    };
-
-    fetchHello();
+    fetchDebugUsers();
   }, []);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -148,24 +46,20 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const user = userList.find(u => u.login_id === loginId && u.password === password);
-      
+      const success = await login(loginId, password);
       setDebugInfo(prev => ({
         ...prev,
-        attemptedLogin: { login_id: loginId, password },
-        foundUser: user || null
+        loginAttempt: {
+          id: loginId,
+          success
+        }
       }));
 
-      if (user) {
-        setAuthCache(user);
-        const success = await login(loginId, password);
-        if (success) {
-          navigate('/');
-          return;
-        }
+      if (success) {
+        navigate('/');
+      } else {
+        setError('IDまたはパスワードが間違っています');
       }
-
-      setError('IDまたはパスワードが間違っています');
     } catch (error) {
       setError('ログインに失敗しました。もう一度お試しください');
       console.error('Login error:', error);
@@ -180,8 +74,8 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-2xl">
-        <Card className="mb-4">
+      <div className="w-full max-w-4xl p-4">
+        <Card className="mb-4 w-full max-w-md mx-auto">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">
               シェアハウス清掃管理システム
@@ -223,7 +117,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={isLoading || !userList.length}
+                disabled={isLoading}
               >
                 {isLoading ? 'ログイン中...' : 'ログイン'}
               </Button>
@@ -231,51 +125,43 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        {/* デバッグ情報表示 */}
-        <Card>
+        {/* デバッグ情報 */}
+        <Card className="w-full">
           <CardHeader>
             <CardTitle>デバッグ情報</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="bg-gray-100 p-4 rounded overflow-auto">
-              <h3 className="font-bold mb-2">状態:</h3>
-              <pre className="mb-4">{debugInfo.loadingState}</pre>
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-bold mb-2">APIレスポンス:</h3>
+                <pre className="bg-gray-100 p-4 rounded overflow-auto max-h-40">
+                  {JSON.stringify(debugInfo.apiResponse, null, 2)}
+                </pre>
+              </div>
 
-              <h3 className="font-bold mb-2">リクエストURL:</h3>
-              <pre className="mb-4">{debugInfo.requestUrl}</pre>
+              <div>
+                <h3 className="font-bold mb-2">取得したユーザーリスト:</h3>
+                <pre className="bg-gray-100 p-4 rounded overflow-auto max-h-40">
+                  {JSON.stringify(debugInfo.userList, null, 2)}
+                </pre>
+              </div>
 
-              <h3 className="font-bold mb-2">取得したユーザーリスト:</h3>
-              <pre className="mb-4">{JSON.stringify(userList, null, 2)}</pre>
-              
-              {debugInfo.attemptedLogin && (
-                <>
+              {debugInfo.loginAttempt && (
+                <div>
                   <h3 className="font-bold mb-2">最後のログイン試行:</h3>
-                  <pre className="mb-4">{JSON.stringify(debugInfo.attemptedLogin, null, 2)}</pre>
-                  
-                  <h3 className="font-bold mb-2">見つかったユーザー:</h3>
-                  <pre className="mb-4">{JSON.stringify(debugInfo.foundUser, null, 2)}</pre>
-                </>
+                  <pre className="bg-gray-100 p-4 rounded overflow-auto">
+                    {JSON.stringify(debugInfo.loginAttempt, null, 2)}
+                  </pre>
+                </div>
               )}
-              
+
               {debugInfo.error && (
-                <>
-                  <h3 className="font-bold mb-2">エラー:</h3>
-                  <pre>{JSON.stringify(debugInfo.error, null, 2)}</pre>
-                </>
-              )}
-
-              {debugInfo.rawResponse && (
-                <>
-                  <h3 className="font-bold mb-2">生のレスポンス:</h3>
-                  <pre>{debugInfo.rawResponse}</pre>
-                </>
-              )}
-
-              {debugInfo.helloApiResponse && (
-                <>
-                  <h3 className="font-bold mb-2">Hello APIレスポンス:</h3>
-                  <pre>{JSON.stringify(debugInfo.helloApiResponse, null, 2)}</pre>
-                </>
+                <div>
+                  <h3 className="font-bold mb-2 text-red-500">エラー情報:</h3>
+                  <pre className="bg-red-50 p-4 rounded overflow-auto">
+                    {JSON.stringify(debugInfo.error, null, 2)}
+                  </pre>
+                </div>
               )}
             </div>
           </CardContent>
