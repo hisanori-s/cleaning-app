@@ -36,7 +36,6 @@ class ApiError extends Error {
  */
 interface MockDataProvider {
   getRoomDetail: (propertyId: number, roomNumber: string) => ApiResponse<RoomDetail>;
-  getRooms: () => ApiResponse<RoomDetail[]>;
 }
 
 /**
@@ -65,46 +64,8 @@ class WordPressApiClient {
    * ログイン処理
    * @param credentials ログイン情報
    */
-  async login(credentials: LoginCredentials): Promise<ApiResponse<User>> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/${API_NAMESPACE}${AUTH_LOGIN_ENDPOINT}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': API_KEY || 'test123'
-        },
-        body: JSON.stringify({
-          login_id: credentials.username,
-          password: credentials.password
-        }),
-      });
 
-      return this.handleResponse<User>(response);
-    } catch (error) {
-      console.error('Login error:', error);
-      throw new ApiError(
-        'Login failed',
-        'LOGIN_ERROR',
-        500
-      );
-    }
-  }
-
-  async logout(): Promise<void> {
-    if (!this.token) return;
-
-    try {
-      await fetch(`${API_BASE_URL}/auth/logout`, {
-        method: 'POST',
-        headers: this.getHeaders(),
-      });
-    } catch (error) {
-      console.warn('Logout failed:', error);
-    } finally {
-      this.token = null;
-    }
-  }
-
+  // 部屋リスト取得
   async getRooms(): Promise<ApiResponse<RoomDetail[]>> {
     if (IS_DEVELOPMENT) {
       return defaultMockProvider.getRooms();

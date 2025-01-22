@@ -11,6 +11,29 @@ import {
 import type { Room } from '@/types/room-list';
 import { useMemo } from 'react';
 
+// デバッグ情報表示コンポーネント
+function DebugInfo() {
+  const userInfo = localStorage.getItem('auth_user');
+  const parsedInfo = userInfo ? JSON.parse(userInfo) : null;
+
+  if (!userInfo) {
+    return (
+      <div className="bg-yellow-100 p-4 mb-4 rounded-md">
+        <h3 className="font-bold text-yellow-800">【デバッグ情報】</h3>
+        <p className="text-yellow-700">ユーザー情報が見つかりません</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-blue-100 p-4 mb-4 rounded-md">
+      <h3 className="font-bold text-blue-800">【デバッグ情報】</h3>
+      <pre className="text-sm text-blue-700 whitespace-pre-wrap">
+        {JSON.stringify(parsedInfo, null, 2)}
+      </pre>
+    </div>
+  );
+}
 
 // 共通のラベルスタイル
 const LABEL_BASE_STYLE = 'px-2 py-1 rounded-full text-sm';
@@ -186,12 +209,15 @@ export function RoomListBox({
     }
 
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className={titleColor}>{title}</CardTitle>
-        </CardHeader>
-        {renderRoomTable(validRooms)}
-      </Card>
+      <>
+        <DebugInfo />
+        <Card>
+          <CardHeader>
+            <CardTitle className={titleColor}>{title}</CardTitle>
+          </CardHeader>
+          {renderRoomTable(validRooms)}
+        </Card>
+      </>
     );
   } catch (error) {
     if (error instanceof Error && onError) {
