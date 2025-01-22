@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { MessageBox } from '@/components/dashboard/message-box/message-box';
-import { RoomListBoxMock } from '@/components/dashboard/room-list-box/room-list-box-mock';
-import type { Room, RoomListResponse } from '@/types/room';
+import { RoomListBoxMock } from '@/components/dashboard/room-list-box/room-list-box-mock'; // モックデータ
+import { RoomListBox } from '@/components/dashboard/room-list-box/room-list-box'; // 本番データ
+import type { Room, RoomListResponse } from '@/types/room-list';
 import mockData from '@/__tests__/mocks/api/properties-rooms.json';
 
 // モックデータの型アサーション
@@ -57,7 +58,7 @@ export default function DashboardPage() {
         message="このダッシュボードでは、担当する部屋の清掃状況を確認できます。"
       />
       
-      {/* ステータスごとの部屋一覧 */}
+      {/* 【モック】ステータスごとの部屋一覧 */}
       <RoomListBoxMock
         title="【モック：このタイトルは表示されない】ステータス別部屋一覧"
         rooms={rooms}
@@ -65,9 +66,23 @@ export default function DashboardPage() {
         onError={(error) => setError(error)}
       />
 
-      {/* 全部屋一覧 */}
+      {/* 【モック】全部屋一覧 */}
       <RoomListBoxMock
         title="【モック】全部屋一覧"
+        rooms={rooms}
+        onError={(error) => setError(error)}
+      />
+      {/* ステータスごとの部屋一覧 */}
+      <RoomListBox
+        title="【本番：このタイトルは表示されない】ステータス別部屋一覧"
+        rooms={rooms}
+        groupByStatus={true}
+        onError={(error) => setError(error)}
+      />
+
+      {/* 全部屋一覧 */}
+      <RoomListBox
+        title="【本番】全部屋一覧"
         rooms={rooms}
         onError={(error) => setError(error)}
       />
