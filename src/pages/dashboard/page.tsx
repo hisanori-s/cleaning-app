@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { MessageBox } from '@/components/dashboard/message-box/message-box';
 import { RoomListBoxMock } from '@/components/dashboard/room-list-box/room-list-box-mock'; // モックデータ
 import { RoomListBox } from '@/components/dashboard/room-list-box/room-list-box'; // 本番データ
-import type { Room, RoomListResponse } from '@/types/room-list';
+import type { RoomList, RoomListResponse } from '@/types';
 import mockData from '@/__tests__/mocks/api/properties-rooms.json';
 
 // モックデータの型アサーション
 const mockRooms = (mockData as RoomListResponse).mock_rooms_list;
 
 export default function DashboardPage() {
-  const [rooms] = useState<Room[]>(mockRooms);
+  const [MockRooms] = useState<RoomList[]>(mockRooms);
   const [isLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -37,7 +37,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (rooms.length === 0) {
+  if (MockRooms.length === 0) {
     return (
       <div className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-6">ダッシュボード</h1>
@@ -61,7 +61,7 @@ export default function DashboardPage() {
       {/* 【モック】ステータスごとの部屋一覧 */}
       <RoomListBoxMock
         title="【モック：このタイトルは表示されない】ステータス別部屋一覧"
-        rooms={rooms}
+        rooms={MockRooms}
         groupByStatus={true}
         onError={(error) => setError(error)}
       />
@@ -69,13 +69,13 @@ export default function DashboardPage() {
       {/* 【モック】全部屋一覧 */}
       <RoomListBoxMock
         title="【モック】全部屋一覧"
-        rooms={rooms}
+        rooms={MockRooms}
         onError={(error) => setError(error)}
       />
       {/* ステータスごとの部屋一覧 */}
       <RoomListBox
         title="【本番：このタイトルは表示されない】ステータス別部屋一覧"
-        rooms={rooms}
+        rooms={MockRooms}
         groupByStatus={true}
         onError={(error) => setError(error)}
       />
@@ -83,7 +83,7 @@ export default function DashboardPage() {
       {/* 全部屋一覧 */}
       <RoomListBox
         title="【本番】全部屋一覧"
-        rooms={rooms}
+        rooms={MockRooms}
         onError={(error) => setError(error)}
       />
     </div>

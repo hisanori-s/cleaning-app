@@ -10,7 +10,7 @@ export interface RoomStatusLabel {
  * 部屋情報の型定義
  * 物件に紐づく個別の部屋情報を表現します
  */
-export interface Room {
+export interface RoomList {
   /** 物件ID */
   house_id: number;
   /** 物件名 */
@@ -32,5 +32,5 @@ export interface Room {
  * APIから返される部屋一覧データの形式を定義します
  */
 export interface RoomListResponse {
-  mock_rooms_list: Room[];
+  mock_rooms_list: RoomList[];
 } 

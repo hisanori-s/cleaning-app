@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import type { Room } from '@/types/room-list';
+import type { RoomList } from '@/types';
 import { useMemo } from 'react';
 
 
@@ -23,7 +23,7 @@ const EARLY_LEAVE_LABEL_STYLES = {
 
 export interface RoomListBoxMockProps {
   title: string;
-  rooms: Room[];
+  rooms: RoomList[];
   titleColor?: string;
   onError?: (error: Error) => void;
   groupByStatus?: boolean;
@@ -32,7 +32,7 @@ export interface RoomListBoxMockProps {
 interface StatusGroup {
   label: string;
   color: string;
-  rooms: Room[];
+  rooms: RoomList[];
 }
 
 export function RoomListBoxMock({ 
@@ -90,7 +90,7 @@ export function RoomListBoxMock({
     return Object.values(groups);
   }, [validRooms, groupByStatus]);
 
-  const renderRoomTable = (roomsToRender: Room[]) => (
+  const renderRoomTable = (roomsToRender: RoomList[]) => (
     <Table>
       <TableHeader>
         <TableRow>

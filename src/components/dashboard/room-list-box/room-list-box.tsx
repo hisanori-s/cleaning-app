@@ -8,13 +8,39 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import type { Room } from '@/types/room-list';
-import { useMemo } from 'react';
+import type { RoomList } from '@/types/room-list';
+import { useMemo, useEffect, useState } from 'react';
+import { getRooms } from '@/api/wordpress';
+import type { ApiResponse } from '@/types/api';
 
 // デバッグ情報表示コンポーネント
+const DebugMode = true;
 function DebugInfo() {
+  const [roomList, setRoomList] = useState<RoomList[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
   const userInfo = localStorage.getItem('auth_user');
   const parsedInfo = userInfo ? JSON.parse(userInfo) : null;
+
+  // ユーザーの担当物件IDがある場合、部屋一覧を取得
+  useEffect(() => {
+    const fetchRooms = async () => {
+      if (parsedInfo?.data?.house_ids) {
+        try {
+          const response: ApiResponse<RoomList[]> = await getRooms(parsedInfo.data.house_ids);
+          if (response.success && response.data) {
+            setRoomList(response.data);
+          }
+        } catch (err) {
+          setError(err instanceof Error ? err.message : '部屋一覧の取得に失敗しました');
+        }
+      }
+    };
+
+    fetchRooms();
+  }, [parsedInfo]);
+
+  if (!DebugMode) return null;
 
   if (!userInfo) {
     return (
@@ -26,11 +52,26 @@ function DebugInfo() {
   }
 
   return (
-    <div className="bg-blue-100 p-4 mb-4 rounded-md">
-      <h3 className="font-bold text-blue-800">【デバッグ情報】</h3>
-      <pre className="text-sm text-blue-700 whitespace-pre-wrap">
-        {JSON.stringify(parsedInfo, null, 2)}
-      </pre>
+    <div className="bg-blue-100 p-4 mb-4 rounded-md space-y-4">
+      <div>
+        <h3 className="font-bold text-blue-800">【ユーザー情報】</h3>
+        <pre className="text-sm text-blue-700 whitespace-pre-wrap">
+          {JSON.stringify(parsedInfo, null, 2)}
+        </pre>
+      </div>
+
+      <div>
+        <h3 className="font-bold text-blue-800">【担当物件の部屋一覧】</h3>
+        {error ? (
+          <p className="text-red-500">{error}</p>
+        ) : roomList ? (
+          <pre className="text-sm text-blue-700 whitespace-pre-wrap">
+            {JSON.stringify(roomList, null, 2)}
+          </pre>
+        ) : (
+          <p className="text-blue-700">読み込み中...</p>
+        )}
+      </div>
     </div>
   );
 }
@@ -46,7 +87,7 @@ const EARLY_LEAVE_LABEL_STYLES = {
 
 export interface RoomListBoxProps {
   title: string;
-  rooms: Room[];
+  rooms: RoomList[];
   titleColor?: string;
   onError?: (error: Error) => void;
   groupByStatus?: boolean;
@@ -55,7 +96,7 @@ export interface RoomListBoxProps {
 interface StatusGroup {
   label: string;
   color: string;
-  rooms: Room[];
+  rooms: RoomList[];
 }
 
 export function RoomListBox({ 
@@ -113,7 +154,7 @@ export function RoomListBox({
     return Object.values(groups);
   }, [validRooms, groupByStatus]);
 
-  const renderRoomTable = (roomsToRender: Room[]) => (
+  const renderRoomTable = (roomsToRender: RoomList[]) => (
     <Table>
       <TableHeader>
         <TableRow>

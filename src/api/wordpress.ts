@@ -1,6 +1,6 @@
 import { User, RoomDetail, CleaningReport, ApiResponse } from '../types/index';
 import roomDetailMock from '../__tests__/mocks/api/room-detail.json';
-
+import type { RoomList } from '../types/room-list';
 // エンドポイントの型
 // fetch('https://your-site.com/wp-json/cleaning-management/v1/users', {
 //   headers: {
@@ -8,12 +8,13 @@ import roomDetailMock from '../__tests__/mocks/api/room-detail.json';
 //   }
 // })
 
+
 // APIエンドポイントの設定
 const API_BASE_URL = import.meta.env.VITE_WP_API_BASE_URL;
 const API_NAMESPACE = import.meta.env.VITE_WP_API_NAMESPACE;
 const API_USERS_ENDPOINT = import.meta.env.VITE_WP_API_USERS_ENDPOINT;
+const API_ROOMS_LIST_ENDPOINT = import.meta.env.VITE_WP_API_ROOMS_LIST_ENDPOINT;
 const API_KEY = import.meta.env.VITE_WP_API_KEY;
-const AUTH_LOGIN_ENDPOINT = import.meta.env.VITE_WP_API_AUTH_LOGIN;
 // 開発環境判定は他の機能で必要な場合があるため残す
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
 
@@ -46,10 +47,6 @@ const defaultMockProvider: MockDataProvider = {
     success: true,
     data: roomDetailMock.mock_room_detail
   }),
-  getRooms: () => ({
-    success: true,
-    data: [roomDetailMock.mock_room_detail]
-  })
 };
 
 interface LoginCredentials {
@@ -61,22 +58,38 @@ class WordPressApiClient {
   private token: string | null = null;
 
   /**
-   * ログイン処理
-   * @param credentials ログイン情報
+   * 部屋一覧を取得する
+   * @param houseIds 物件IDの配列
+   * @returns Promise<ApiResponse<RoomList[]>>
    */
-
-  // 部屋リスト取得
-  async getRooms(): Promise<ApiResponse<RoomDetail[]>> {
-    if (IS_DEVELOPMENT) {
-      return defaultMockProvider.getRooms();
-    }
+  async getRooms(houseIds: number[]): Promise<ApiResponse<RoomList[]>> {
+    const requestUrl = `${API_BASE_URL}${API_ROOMS_LIST_ENDPOINT}`;
+    console.log('Requesting rooms from:', requestUrl);
+    console.log('Request headers:', this.getHeaders());
+    console.log('Request params:', { house_ids: houseIds });
 
     try {
-      const response = await fetch(`${API_BASE_URL}/rooms`, {
-        headers: this.getHeaders(),
+      // クエリパラメータを構築
+      const queryParams = houseIds.map(id => `house_ids[]=${id}`).join('&');
+      const response = await fetch(`${requestUrl}?${queryParams}`, {
+        method: 'GET',
+        headers: this.getHeaders()
       });
-      return this.handleResponse<RoomDetail[]>(response);
+      
+      const result = await this.handleResponse<{ message: string; data: RoomList[] }>(response);
+      if (!result.data?.data) {
+        throw new ApiError(
+          'Invalid response format: missing data',
+          'PARSE_ERROR',
+          500
+        );
+      }
+      return {
+        success: true,
+        data: result.data.data
+      };
     } catch (error) {
+      console.error('API Request failed:', error);
       if (error instanceof ApiError) {
         throw error;
       }
@@ -88,11 +101,37 @@ class WordPressApiClient {
     }
   }
 
-  async getRoom(propertyId: number, roomNumber: string): Promise<ApiResponse<RoomDetail>> {
-    if (IS_DEVELOPMENT) {
-      return defaultMockProvider.getRoomDetail(propertyId, roomNumber);
-    }
+  /**
+   * ユーザー情報を取得する
+   * @returns Promise<ApiResponse<User[]>>
+   */
+  async getUsers(): Promise<ApiResponse<User[]>> {
+    const requestUrl = `${API_BASE_URL}${API_USERS_ENDPOINT}`;
+    console.log('Requesting users from:', requestUrl);
+    console.log('Request headers:', this.getHeaders());
 
+    try {
+      const response = await fetch(requestUrl, {
+        method: 'GET',
+        headers: this.getHeaders()
+      });
+      
+      return await this.handleResponse<User[]>(response);
+    } catch (error) {
+      console.error('API Request failed:', error);
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(
+        'Failed to fetch users',
+        'FETCH_ERROR',
+        500
+      );
+    }
+  }
+
+
+  async getRoom(propertyId: number, roomNumber: string): Promise<ApiResponse<RoomDetail>> {
     try {
       const response = await fetch(`${API_BASE_URL}/rooms/${propertyId}/${roomNumber}`, {
         headers: this.getHeaders(),
@@ -130,83 +169,6 @@ class WordPressApiClient {
     }
   }
 
-  async uploadImage(file: File): Promise<ApiResponse<{ url: string }>> {
-    try {
-      const formData = new FormData();
-      formData.append('image', file);
-
-      const response = await fetch(`${API_BASE_URL}/media`, {
-        method: 'POST',
-        headers: this.getHeaders(true),
-        body: formData,
-      });
-      return this.handleResponse<{ url: string }>(response);
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(
-        'Failed to upload image',
-        'UPLOAD_ERROR',
-        500
-      );
-    }
-  }
-
-  /**
-   * ユーザー情報を取得する
-   * @returns Promise<ApiResponse<User[]>>
-   */
-  async getUsers(): Promise<ApiResponse<User[]>> {
-    const requestUrl = `${API_BASE_URL}${API_USERS_ENDPOINT}`;
-    console.log('Requesting users from:', requestUrl);
-    console.log('Request headers:', this.getHeaders());
-
-    try {
-      const response = await fetch(requestUrl, {
-        method: 'GET',
-        headers: this.getHeaders()
-      });
-      
-      return await this.handleResponse<User[]>(response);
-    } catch (error) {
-      console.error('API Request failed:', error);
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(
-        'Failed to fetch users',
-        'FETCH_ERROR',
-        500
-      );
-    }
-  }
-// サンプルのAPIコールここから
-async getHello(): Promise<ApiResponse<{ message: string }>> {
-  const requestUrl = `${API_BASE_URL}${import.meta.env.VITE_WP_API_SAMPLE_ENDPOINT}`;
-  console.log('Requesting hello from:', requestUrl);
-  console.log('Using headers:', this.getHeaders()); // デバッグ用
-
-  try {
-    const response = await fetch(requestUrl, {
-      method: 'GET',
-      headers: this.getHeaders(),
-    });
-    
-    return await this.handleResponse<{ message: string }>(response);
-  } catch (error) {
-    console.error('Hello API Request failed:', error);
-    if (error instanceof ApiError) {
-      throw error;
-    }
-    throw new ApiError(
-      'Failed to fetch hello',
-      'FETCH_ERROR',
-      500
-    );
-  }
-}
-// サンプルのAPIコールここまで
   private getHeaders(isFormData = false): HeadersInit {
     const headers: HeadersInit = {
       'X-API-Key': API_KEY || 'test123'
@@ -253,7 +215,7 @@ async getHello(): Promise<ApiResponse<{ message: string }>> {
       const data = await response.json();
       return {
         success: true,
-        data: data as T
+        data: data
       };
     } catch (error) {
       console.error('Failed to parse response:', error);
@@ -269,15 +231,7 @@ async getHello(): Promise<ApiResponse<{ message: string }>> {
 const client = new WordPressApiClient();
 
 // APIメソッドのエクスポート
-export const getHello = () => client.getHello();
 export const getUsers = () => client.getUsers();
-export const login = (credentials: LoginCredentials) => client.login(credentials);
-export const logout = () => client.logout();
-export const getRooms = () => client.getRooms();
+export const getRooms = (houseIds: number[]) => client.getRooms(houseIds);
 export const getRoomDetails = (propertyId: number, roomNumber: string) => client.getRoom(propertyId, roomNumber);
 export const uploadReport = (report: Omit<CleaningReport, 'id'>) => client.submitReport(report);
-export const uploadImage = (file: File) => client.uploadImage(file);
-export const getRoomCleaningHistory = async (roomId: number) => {
-  // 履歴取得のメソッドを実装
-  return [];
-};
