@@ -49,8 +49,8 @@ function get_users_data() {
 テストエンドポイント
 */
 
-
 // エンドポイントの登録
+/*
 add_action('rest_api_init', 'register_hello_endpoint');
 
 function register_hello_endpoint() {
@@ -71,3 +71,4 @@ function get_hello_response() {
         'message' => 'hello world'
     ), 200);
 }
+    */
