@@ -8,8 +8,18 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import type { Room } from '@/types/room';
+import type { Room } from '@/types/room-list';
 import { useMemo } from 'react';
+
+
+// 共通のラベルスタイル
+const LABEL_BASE_STYLE = 'px-2 py-1 rounded-full text-sm';
+// 早期退去ラベルのスタイル設定
+const EARLY_LEAVE_LABEL_STYLES = {
+  color: '#9C27B0',
+  backgroundColor: '#9C27B033',
+  text: '早期退去済み'
+} as const;
 
 export interface RoomListBoxMockProps {
   title: string;
@@ -39,14 +49,15 @@ export function RoomListBoxMock({
     try {
       return rooms.filter(room => {
         if (!room || 
-            !room.property_id || 
-            !room.property_name || 
+            !room.house_id || 
+            !room.house_name || 
             room.room_number === undefined || // 空文字は許可
-            !room.vacancy_date ||
-            !room.cleaning_deadline || 
-            !room.status ||
-            !room.status['label-color'] ||
-            !room.status['label-text']) {
+            !room.moveout_date ||
+            !room.vacancy_date || 
+            room.early_leave === undefined ||
+            !room['status-label'] ||
+            !room['status-label'].color ||
+            !room['status-label'].text) {
           return false;
         }
         return true;
@@ -65,11 +76,11 @@ export function RoomListBoxMock({
 
     const groups: Record<string, StatusGroup> = {};
     validRooms.forEach(room => {
-      const statusText = room.status['label-text'];
+      const statusText = room['status-label'].text;
       if (!groups[statusText]) {
         groups[statusText] = {
           label: statusText,
-          color: room.status['label-color'],
+          color: room['status-label'].color,
           rooms: []
         };
       }
@@ -83,8 +94,8 @@ export function RoomListBoxMock({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>退去予定日</TableHead>
-          <TableHead>清掃期限</TableHead>
+          <TableHead>退去日</TableHead>
+          <TableHead>空室予定日</TableHead>
           <TableHead>物件名</TableHead>
           <TableHead>部屋番号</TableHead>
           <TableHead>ステータス</TableHead>
@@ -93,12 +104,14 @@ export function RoomListBoxMock({
       <TableBody>
         {roomsToRender.map((room, index) => (
           <TableRow
-            key={`${room.property_id}-${room.room_number}-${index}`}
+            key={`${room.house_id}-${room.room_number}-${index}`}
             className="cursor-pointer hover:bg-gray-50"
             onClick={() => {
-              // セッションストレージに選択された部屋の情報を保存
+              // リンク機能の作成部分
+              // 部屋の詳細情報へ移動
+              // セッションストレージに選択された部屋の情報を保存（物件ID＆部屋番号）
               const selectedRoom = {
-                property_id: room.property_id,
+                house_id: room.house_id,
                 room_number: room.room_number,
                 timestamp: Date.now()
               };
@@ -106,20 +119,31 @@ export function RoomListBoxMock({
               navigate('/rooms');
             }}
           >
+            <TableCell>{room.moveout_date}</TableCell>
             <TableCell>{room.vacancy_date}</TableCell>
-            <TableCell>{room.cleaning_deadline}</TableCell>
-            <TableCell>{room.property_name}</TableCell>
+            <TableCell>{room.house_name}</TableCell>
             <TableCell>{room.room_number || ''}</TableCell>
-            <TableCell>
+            <TableCell className="space-x-2">
               <span
-                className="px-2 py-1 rounded-full text-sm"
+                className={LABEL_BASE_STYLE}
                 style={{
-                  color: room.status['label-color'],
-                  backgroundColor: `${room.status['label-color']}33`
+                  color: room['status-label'].color,
+                  backgroundColor: `${room['status-label'].color}33`
                 }}
               >
-                {room.status['label-text']}
+                {room['status-label'].text}
               </span>
+              {room.early_leave && (
+                <span
+                  className={LABEL_BASE_STYLE}
+                  style={{
+                    color: EARLY_LEAVE_LABEL_STYLES.color,
+                    backgroundColor: EARLY_LEAVE_LABEL_STYLES.backgroundColor
+                  }}
+                >
+                  {EARLY_LEAVE_LABEL_STYLES.text}
+                </span>
+              )}
             </TableCell>
           </TableRow>
         ))}

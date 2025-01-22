@@ -39,7 +39,9 @@ function register_room_list_rest_route() {
  * @property {string} moveout_date - 退去予定日 (ISO 8601形式)
  * @property {string} vacancy_date - 空室予定日 (ISO 8601形式)
  * @property {boolean} early_leave - 早期退去フラグ
- * @property {number} customer_id - 入居者ID
+ * @property {Object} status_label - ステータスラベル
+ * @property {string} status_label.color - ラベルの色
+ * @property {string} status_label.text - ラベルのテキスト
  * 
  * @returns {RoomListItem[]}
  */
@@ -82,23 +84,44 @@ function get_room_list_data($request) {
                                 $vacancy_date_obj = clone $moveout_date_obj;
                                 $vacancy_date_obj->modify('+7 days');
                                 
+                                // 現在日時を取得
+                                $now = new DateTime();
+                                $now->setTime(0, 0, 0);
+
+                                // ステータスラベルの判定
+                                $status_label = array();
+                                if ($moveout_date_obj >= $now) {
+                                    // 退去予定（グレー系）
+                                    // 退去予定日が今日以前（当日含む）の場合は、退去予定のラベルを返す。
+                                    $status_label = array(
+                                        'color' => '#888888',
+                                        'text' => '退去予定'
+                                    );
+                                } elseif ($now > $moveout_date_obj && $now <= $vacancy_date_obj) {
+                                    // 入室可能（緑系）
+                                    // 今日が退去予定日の翌日～空室予定日の前日の間は、入室可能のラベルを返す。
+                                    $status_label = array(
+                                        'color' => '#44BB44',
+                                        'text' => '入室可能'
+                                    );
+                                } else {
+                                    // 期限超過（赤系）
+                                    // 空室予定日の翌日以降は、期限超過のラベルを返す。
+                                    $status_label = array(
+                                        'color' => '#FF4444',
+                                        'text' => '期限超過'
+                                    );
+                                }
+                                
                                 // 戻り値の配列に部屋情報を追加
-                                // @typedef {Object} RoomListItem
-                                // @property {number} house_id - 物件ID
-                                // @property {string} house_name - 建物名
-                                // @property {string} room_number - 部屋番号
-                                // @property {string} moveout_date - 退去予定日 (ISO 8601形式)
-                                // @property {string} vacancy_date - 空室予定日 (ISO 8601形式)
-                                // @property {boolean} early_leave - 早期退去フラグ
-                                // @property {number} customer_id - 入居者ID
                                 $return_room_list[] = array(
                                     'house_id'     => (int)$house_id,
                                     'house_name'   => (string)$house_name,
                                     'room_number'  => (string)$room_number,
-                                    'moveout_date' => $moveout_date_obj->format('c'),
-                                    'vacancy_date' => $vacancy_date_obj->format('c'),
+                                    'moveout_date' => $moveout_date_obj->format('Y-m-d'),
+                                    'vacancy_date' => $vacancy_date_obj->format('Y-m-d'),
                                     'early_leave'  => (bool)!empty($customer_data1["early-leave-done"]),
-                                    'customer_id'  => (int)$now_id
+                                    'status_label' => $status_label
                                 );
                             }
                         }
@@ -157,7 +180,10 @@ function get_room_list_data($request) {
  *       "moveout_date": "2024-04-01T00:00:00+09:00",
  *       "vacancy_date": "2024-04-08T00:00:00+09:00",
  *       "early_leave": false,
- *       "customer_id": 123
+ *       "status_label": {
+ *         "color": "#888888",
+ *         "text": "退去予定"
+ *       }
  *     }
  *   ]
  * }

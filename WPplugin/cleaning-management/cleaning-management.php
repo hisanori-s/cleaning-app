@@ -78,7 +78,7 @@ $api_dir = plugin_dir_path(__FILE__) . 'api/';
 if (is_dir($api_dir)) {
     $files = scandir($api_dir);
     foreach ($files as $file) {
-        if (strpos($file, 'class-') === 0 && strpos($file, '.php') !== false) {
+        if (strpos($file, 'api-') === 0 && strpos($file, '.php') !== false) {
             require_once $api_dir . $file;
         }
     }

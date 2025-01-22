@@ -2,9 +2,9 @@ import React from 'react';
 import { render, screen, waitFor, RenderResult } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { describe, it, expect, vi } from 'vitest';
-import { RoomListBox } from '@/components/dashboard/room-list-box/room-list-box';
+import { RoomListBoxMock } from '@/components/dashboard/room-list-box/room-list-box-mock';
 import { BrowserRouter } from 'react-router-dom';
-import type { Room, RoomListResponse } from '@/types/room';
+import type { Room, RoomListResponse } from '@/types/room-list';
 import mockData from '@/__tests__/mocks/api/properties-rooms.json';
 
 // モックデータの型アサーション
@@ -28,7 +28,7 @@ const renderWithRouter = ({
 }: RenderWithRouterOptions = {}): RenderResult => {
   return render(
     <BrowserRouter>
-      <RoomListBox
+      <RoomListBoxMock
         title={title}
         rooms={rooms}
         titleColor={titleColor}
@@ -43,7 +43,7 @@ const renderWithRouter = ({
 const generateLargeDataset = (count: number): Room[] => {
   // モックデータからユニークなステータスを取得
   const uniqueStatuses = [...new Set(
-    typedMockData.mock_rooms_list.map(room => JSON.stringify(room.status))
+    typedMockData.mock_rooms_list.map(room => JSON.stringify(room['status-label']))
   )].map(status => JSON.parse(status));
 
   // 各ステータスの出現回数を均等にするため、
@@ -62,12 +62,13 @@ const generateLargeDataset = (count: number): Room[] => {
     for (let i = 0; i < roomCount; i++) {
       const index = rooms.length;
       rooms.push({
-        property_id: Math.floor(index / 10) + 1,
-        property_name: `シェアハウスA`,
+        house_id: Math.floor(index / 10) + 1,
+        house_name: `シェアハウスA`,
         room_number: `${(index + 1).toString().padStart(3, '0')}`,
-        vacancy_date: new Date(2024, 0, 1 + index % 30).toISOString().split('T')[0],
-        cleaning_deadline: new Date(2024, 0, 8 + index % 30).toISOString().split('T')[0],
-        status: status
+        moveout_date: new Date(2024, 0, 1 + index % 30).toISOString().split('T')[0],
+        vacancy_date: new Date(2024, 0, 8 + index % 30).toISOString().split('T')[0],
+        early_leave: index % 3 === 0,
+        'status-label': status
       });
     }
   });
@@ -85,19 +86,20 @@ const measurePerformance = (name: string, fn: () => void): number => {
   return duration;
 };
 
-describe('RoomListBox', () => {
+describe('RoomListBoxMock', () => {
   describe('正常系', () => {
     it('モックデータの全項目が正しく表示されること', () => {
       const mockRooms = [
         {
-          property_id: 1,
-          property_name: 'シェアハウスA',
+          house_id: 1,
+          house_name: 'シェアハウスA',
           room_number: '101',
+          moveout_date: '2024-01-13',
           vacancy_date: '2024-01-20',
-          cleaning_deadline: '2024-02-01',
-          status: {
-            'label-color': '#FF4444',
-            'label-text': '期限超過'
+          early_leave: false,
+          'status-label': {
+            color: '#FF4444',
+            text: '期限超過'
           }
         }
       ];
@@ -106,8 +108,8 @@ describe('RoomListBox', () => {
 
       // 各要素が正しく表示されていることを確認
       expect(screen.getByText('101')).toBeInTheDocument();
+      expect(screen.getByText('2024-01-13')).toBeInTheDocument();
       expect(screen.getByText('2024-01-20')).toBeInTheDocument();
-      expect(screen.getByText('2024-02-01')).toBeInTheDocument();
       expect(screen.getByText('シェアハウスA')).toBeInTheDocument();
       expect(screen.getByText('期限超過')).toBeInTheDocument();
     });
@@ -117,8 +119,8 @@ describe('RoomListBox', () => {
 
       const headers = screen.getAllByRole('columnheader');
       expect(headers).toHaveLength(5);
-      expect(headers[0]).toHaveTextContent('退去予定日');
-      expect(headers[1]).toHaveTextContent('清掃期限');
+      expect(headers[0]).toHaveTextContent('退去日');
+      expect(headers[1]).toHaveTextContent('空室予定日');
       expect(headers[2]).toHaveTextContent('物件名');
       expect(headers[3]).toHaveTextContent('部屋番号');
       expect(headers[4]).toHaveTextContent('ステータス');
@@ -127,14 +129,15 @@ describe('RoomListBox', () => {
     it('ステータスの色とテキストが正しく適用されること', () => {
       const mockRooms = [
         {
-          property_id: 1,
-          property_name: 'シェアハウスA',
+          house_id: 1,
+          house_name: 'シェアハウスA',
           room_number: '101',
+          moveout_date: '2024-01-13',
           vacancy_date: '2024-01-20',
-          cleaning_deadline: '2024-02-01',
-          status: {
-            'label-color': '#FF4444',
-            'label-text': 'カスタムステータス'
+          early_leave: false,
+          'status-label': {
+            color: '#FF4444',
+            text: 'カスタムステータス'
           }
         }
       ];
@@ -145,6 +148,30 @@ describe('RoomListBox', () => {
       const statusSpan = statusElement.closest('span');
       expect(statusSpan).toHaveStyle({ color: '#FF4444' });
       expect(statusSpan).toHaveStyle({ backgroundColor: '#FF444433' });
+    });
+
+    it('早期退去ラベルが正しく表示されること', () => {
+      const mockRooms = [
+        {
+          house_id: 1,
+          house_name: 'シェアハウスA',
+          room_number: '101',
+          moveout_date: '2024-01-13',
+          vacancy_date: '2024-01-20',
+          early_leave: true,
+          'status-label': {
+            color: '#FF4444',
+            text: 'カスタムステータス'
+          }
+        }
+      ];
+
+      renderWithRouter({ rooms: mockRooms });
+
+      const earlyLeaveElement = screen.getByText('早期退去済み');
+      const earlyLeaveSpan = earlyLeaveElement.closest('span');
+      expect(earlyLeaveSpan).toHaveStyle({ color: '#9C27B0' });
+      expect(earlyLeaveSpan).toHaveStyle({ backgroundColor: '#9C27B033' });
     });
 
     it('タイトルの色が正しく適用されること', () => {
@@ -163,19 +190,19 @@ describe('RoomListBox', () => {
       const mockRooms = [
         // 期限超過の部屋
         typedMockData.mock_rooms_list.find(room => 
-          room.status['label-text'] === '期限超過')!,
+          room['status-label'].text === '期限超過')!,
         // 退去予定の部屋
         typedMockData.mock_rooms_list.find(room => 
-          room.status['label-text'] === '退去予定')!,
+          room['status-label'].text === '退去予定')!,
         // もう1つ期限超過の部屋（グループ化のテストのため）
         typedMockData.mock_rooms_list.filter(room => 
-          room.status['label-text'] === '期限超過')[1]
+          room['status-label'].text === '期限超過')[1]
       ];
 
       console.log('Selected mock rooms for grouping test:', 
         mockRooms.map(room => ({
           room_number: room.room_number,
-          status: room.status['label-text']
+          status: room['status-label'].text
         }))
       );
 
@@ -216,23 +243,25 @@ describe('RoomListBox', () => {
     it('不正なデータ形式の場合、エラーを発生させずにスキップすること', () => {
       const invalidRooms = [
         {
-          property_id: 1,
-          property_name: 'サンプルマンション',
+          house_id: 1,
+          house_name: 'サンプルマンション',
           room_number: '101',
+          moveout_date: '2024-01-13',
           vacancy_date: '2024-01-20',
-          cleaning_deadline: '2024-01-15',
-          status: {
-            'label-color': '#FF4444',
-            'label-text': '期限超過'
+          early_leave: false,
+          'status-label': {
+            color: '#FF4444',
+            text: '期限超過'
           }
         },
         {
-          property_id: 2,
-          property_name: 'サンプルマンション',
+          house_id: 2,
+          house_name: 'サンプルマンション',
           room_number: '102',
+          moveout_date: '2024-01-14',
           vacancy_date: '2024-01-21',
-          cleaning_deadline: '2024-01-14',
-          status: {} // 不正なステータス
+          early_leave: false,
+          'status-label': {} // 不正なステータス
         },
       ] as unknown as Room[];
 
@@ -290,7 +319,7 @@ describe('RoomListBox', () => {
       const rerenderTime = measurePerformance('再レンダリング時間', () => {
         rerender(
           <BrowserRouter>
-            <RoomListBox
+            <RoomListBoxMock
               title="タイトル変更"
               rooms={largeDataset}
             />
@@ -333,11 +362,11 @@ describe('RoomListBox', () => {
       // 本番環境と同じロジックでグループ化
       const groups: Record<string, { label: string; color: string; rooms: Room[] }> = {};
       largeDataset.forEach(room => {
-        const statusText = room.status['label-text'];
+        const statusText = room['status-label'].text;
         if (!groups[statusText]) {
           groups[statusText] = {
             label: statusText,
-            color: room.status['label-color'],
+            color: room['status-label'].color,
             rooms: []
           };
         }
