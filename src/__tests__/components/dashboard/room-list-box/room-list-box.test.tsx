@@ -4,7 +4,7 @@ import '@testing-library/jest-dom';
 import { describe, it, expect, vi } from 'vitest';
 import { RoomListBoxMock } from '@/components/dashboard/room-list-box/room-list-box-mock';
 import { BrowserRouter } from 'react-router-dom';
-import type { Room, RoomListResponse } from '@/types/room-list';
+import type { RoomList, RoomListResponse } from '@/types/room-list';
 import mockData from '@/__tests__/mocks/api/properties-rooms.json';
 
 // モックデータの型アサーション
@@ -13,7 +13,7 @@ const typedMockData = mockData as RoomListResponse;
 // テストヘルパー
 interface RenderWithRouterOptions {
   title?: string;
-  rooms?: Room[];
+  rooms?: RoomList[];
   titleColor?: string;
   onError?: (error: Error) => void;
   groupByStatus?: boolean;
@@ -40,7 +40,7 @@ const renderWithRouter = ({
 };
 
 // 大量データ生成ヘルパー
-const generateLargeDataset = (count: number): Room[] => {
+const generateLargeDataset = (count: number): RoomList[] => {
   // モックデータからユニークなステータスを取得
   const uniqueStatuses = [...new Set(
     typedMockData.mock_rooms_list.map(room => JSON.stringify(room['status-label']))
@@ -52,7 +52,7 @@ const generateLargeDataset = (count: number): Room[] => {
   const remainder = count % uniqueStatuses.length;
 
   // 各ステータスごとに部屋データを生成
-  const rooms: Room[] = [];
+  const rooms: RoomList[] = [];
   uniqueStatuses.forEach((status, statusIndex) => {
     // このステータスで生成する部屋の数
     const roomCount = statusIndex < remainder ? 
@@ -263,7 +263,7 @@ describe('RoomListBoxMock', () => {
           early_leave: false,
           'status-label': {} // 不正なステータス
         },
-      ] as unknown as Room[];
+      ] as unknown as RoomList[];
 
       expect(() => {
         renderWithRouter({ rooms: invalidRooms });
@@ -360,7 +360,7 @@ describe('RoomListBoxMock', () => {
       );
 
       // 本番環境と同じロジックでグループ化
-      const groups: Record<string, { label: string; color: string; rooms: Room[] }> = {};
+      const groups: Record<string, { label: string; color: string; rooms: RoomList[] }> = {};
       largeDataset.forEach(room => {
         const statusText = room['status-label'].text;
         if (!groups[statusText]) {
