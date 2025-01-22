@@ -7,82 +7,10 @@
  * - src/components/room-detail/property-info-box/property-info-box.tsx (物件情報の表示)
  * - src/components/room-detail/room-info-box/room-info-box.tsx (部屋情報の表示)
  */
-export type Room = {
-    id: number;
-    name: string;
-    floor: number;
-    status: 'clean' | 'dirty' | 'in_progress';
-    lastCleaned: string;
-    assignedCleaners: number[];
-    images: string[];
-};
-
-/**
- * ユーザー情報を表す型
- * 使用箇所:
- * - src/hooks/use-auth.tsx (認証状態の管理)
- * - src/app.tsx (ユーザーメニューの表示)
- */
-export type User = {
-  /** ログインID */
-  login_id: string;
-  /** パスワード */
-  password: string;
-  /** 担当物件ID配列 */
-  house_ids: number[];
-  /** 表示名 */
-  name: string;
-};
-
-export interface CleaningReport {
-  id: number;
-  roomId: number;
-  cleanerId: number;
-  date: string;
-  checklist: {
-    floor: boolean;
-    bathroom: boolean;
-    kitchen: boolean;
-    windows: boolean;
-    furniture: boolean;
-  };
-  comments: string;
-  images: string[];
-  status: 'submitted' | 'approved' | 'rejected';
-}
-
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: {
-    code: string;
-    message: string;
-  };
-}
-
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  hasMore: boolean;
-}
 
 // 基本的な型定義のエクスポート
-export * from './room';
+export * from './room-list';
 export * from './room-detail';
 export * from './user';
 export * from './cleaning-report';
 export * from './api';
-
-// レスポンス型の定義
-export type LoginResponse = ApiResponse<{
-  token: string;
-  user: User;
-}>;
-
-export type RoomListResponse = ApiResponse<PaginatedResponse<Room>>;
-
-export type ReportSubmitResponse = ApiResponse<{
-  report: CleaningReport;
-}>;
