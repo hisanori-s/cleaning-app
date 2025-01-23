@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getRooms } from '../../api/wordpress';
 import type { RoomList } from '../../types/room-list';
-import { transformRoomData } from '../../lib/dashboard/RoomList';
 import { useAuth } from '../use-auth';
 
 /**
@@ -30,9 +29,8 @@ export const useRoomsList = () => {
           throw new Error('部屋情報の取得に失敗しました');
         }
 
-        // APIレスポンスを表示用データに変換
-        const transformedRooms = transformRoomData(response.data);
-        setRooms(transformedRooms);
+        // APIレスポンスのデータを直接使用（WordPressのAPIレスポンスが既に正しい形式（RoomList[]）で返ってきているため）
+        setRooms(response.data);
       } catch (err) {
         console.error('Error fetching rooms:', err);
         setError(err instanceof Error ? err : new Error('部屋情報の取得中にエラーが発生しました'));
