@@ -18,6 +18,17 @@ type ApiRoomDetailData = {
 };
 
 /**
+ * HTMLタグを改行に変換する
+ * @param text HTMLタグを含むテキスト
+ * @returns 改行に変換されたテキスト
+ */
+const convertHtmlToText = (text: string): string => {
+  return text
+    //.replace(/<br\s*\/?>/gi, '\n')  // <br>タグを削除
+    .replace(/<[^>]*>/g, '');       // その他のHTMLタグを削除
+};
+
+/**
  * APIレスポンスを表示用の部屋詳細情報に変換
  * @param apiData APIから取得した部屋詳細情報
  * @returns 表示用に加工された部屋詳細情報
@@ -64,6 +75,6 @@ export const transformRoomDetailData = (apiData: ApiRoomDetailData): RoomDetail 
     room_key: apiData.room_key,
     building_key: apiData.building_key,
     address: apiData.address,
-    cleaner_note: apiData.cleaner_note || ''
+    cleaner_note: apiData.cleaner_note ? convertHtmlToText(apiData.cleaner_note) : ''
   };
 };

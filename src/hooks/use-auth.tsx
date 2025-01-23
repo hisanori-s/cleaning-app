@@ -84,21 +84,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
 
-  // ユーザーリストの取得
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await getUsers();
-        if (response.success && response.data) {
-          setUserList(response.data);
-          console.log('User list fetched successfully');
-        }
-      } catch (error) {
-        console.error('Failed to fetch users:', error);
+  // ユーザーリストの取得（ログイン時のみ実行）
+  const fetchUsers = async () => {
+    try {
+      const response = await getUsers();
+      if (response.success && response.data) {
+        setUserList(response.data);
+        console.log('User list fetched successfully');
+        return response.data;
       }
-    };
-    fetchUsers();
-  }, []);
+      return [];
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+      return [];
+    }
+  };
 
   /**
    * ログイン処理
@@ -106,18 +106,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
    */
   const login = async (loginId: string, password: string): Promise<boolean> => {
     try {
-      console.log('Login attempt with:', { loginId, password });
-      console.log('Available users:', userList);
+      console.log('Login attempt with:', { loginId });
       
-      const user = userList.find(u => {
-        console.log('Checking user:', u);
+      // ログイン時にユーザーリストを取得
+      const users = await fetchUsers();
+      
+      const user = users.find(u => {
         const matches = u.login_id === loginId && u.password === password;
-        console.log('Matches:', matches);
         return matches;
       });
 
       if (user) {
-        console.log('Login successful:', user);
+        console.log('Login successful');
         setIsAuthenticated(true);
         setUser(user);
         setAuthCache(user);
@@ -138,6 +138,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = () => {
     setIsAuthenticated(false);
     setUser(null);
+    setUserList([]);  // ユーザーリストもクリア
     clearAuthCache();
   };
 
