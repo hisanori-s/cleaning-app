@@ -80,7 +80,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (cachedUser) {
       setIsAuthenticated(true);
       setUser(cachedUser);
-      console.log('Restored auth state from cache:', cachedUser);
+      // ログのコメントアウト：console.log('Restored auth state from cache:', cachedUser);
     }
   }, []);
 
@@ -90,7 +90,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const response = await getUsers();
       if (response.success && response.data) {
         setUserList(response.data);
-        console.log('User list fetched successfully');
+        // ログのコメントアウト：console.log('User list fetched successfully');
         return response.data;
       }
       return [];
@@ -106,7 +106,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
    */
   const login = async (loginId: string, password: string): Promise<boolean> => {
     try {
-      console.log('Login attempt with:', { loginId });
+      // ログのコメントアウト：console.log('Login attempt with:', { loginId });
       
       // ログイン時にユーザーリストを取得
       const users = await fetchUsers();
@@ -117,14 +117,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
 
       if (user) {
-        console.log('Login successful');
+        // ログのコメントアウト：console.log('Login successful');
         setIsAuthenticated(true);
         setUser(user);
         setAuthCache(user);
         return true;
       }
 
-      console.log('Login failed: User not found or invalid credentials');
+      // ログのコメントアウト：console.log('Login failed: User not found or invalid credentials');
       return false;
     } catch (error) {
       console.error('Login error:', error);

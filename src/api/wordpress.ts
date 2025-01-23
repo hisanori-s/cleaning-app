@@ -38,11 +38,11 @@ class WordPressApiClient {
    */
   async getRooms(houseIds: number[]): Promise<ApiResponse<RoomList[]>> {
     const requestUrl = `${API_BASE_URL}${API_ROOMS_LIST_ENDPOINT}`;
-    console.log('API Request:', {
-      url: requestUrl,
-      headers: this.getHeaders(),
-      params: { house_ids: houseIds }
-    });
+    // console.log('API Request:', {
+    //   url: requestUrl,
+    //   headers: this.getHeaders(),
+    //   params: { house_ids: houseIds }
+    // });
 
     try {
       // クエリパラメータを構築
@@ -53,7 +53,7 @@ class WordPressApiClient {
       });
       
       const result = await this.handleResponse<{ message: string; data: RoomList[] }>(response);
-      console.log('API Response:', result);
+      // console.log('API Response:', result);
 
       // WordPressのレスポンス構造に合わせて修正
       const roomsData = result.data?.data || result.data;
@@ -71,7 +71,7 @@ class WordPressApiClient {
         data: roomsData
       };
     } catch (error) {
-      console.error('API Request failed:', error);
+      // console.error('API Request failed:', error);
       if (error instanceof ApiError) {
         throw error;
       }
@@ -89,10 +89,10 @@ class WordPressApiClient {
    */
   async getUsers(): Promise<ApiResponse<User[]>> {
     const requestUrl = `${API_BASE_URL}${API_USERS_ENDPOINT}`;
-    console.log('API Request:', {
-      url: requestUrl,
-      headers: this.getHeaders()
-    });
+    // console.log('API Request:', {
+    //   url: requestUrl,
+    //   headers: this.getHeaders()
+    // });
 
     try {
       const response = await fetch(requestUrl, {
@@ -108,7 +108,7 @@ class WordPressApiClient {
         data: result.data
       };
     } catch (error) {
-      console.error('API Request failed:', error);
+      // console.error('API Request failed:', error);
       if (error instanceof ApiError) {
         throw error;
       }
@@ -123,11 +123,11 @@ class WordPressApiClient {
   // 部屋詳細を取得する
   async getRoomDetails(propertyId: number, roomNumber: string): Promise<ApiResponse<RoomDetail>> {
     const requestUrl = `${API_BASE_URL}${API_ROOMS_DETAIL_ENDPOINT}`;
-    console.log('API Request:', {
-      url: requestUrl,
-      headers: this.getHeaders(),
-      params: { house_id: propertyId, room_number: roomNumber }
-    });
+    // console.log('API Request:', {
+    //   url: requestUrl,
+    //   headers: this.getHeaders(),
+    //   params: { house_id: propertyId, room_number: roomNumber }
+    // });
 
     try {
       // クエリパラメータを構築
@@ -142,14 +142,14 @@ class WordPressApiClient {
       });
       
       // レスポンスの詳細をログ出力
-      console.log('Raw API Response:', {
-        status: response.status,
-        statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries())
-      });
+      // console.log('Raw API Response:', {
+      //   status: response.status,
+      //   statusText: response.statusText,
+      //   headers: Object.fromEntries(response.headers.entries())
+      // });
       
       const result = await this.handleResponse<{ message: string; data: RoomDetail }>(response);
-      console.log('Parsed API Response:', result);
+      // console.log('Parsed API Response:', result);
 
       // WordPressのレスポンス構造に合わせて修正
       // 通常、WordPressのREST APIは直接データを返すか、dataプロパティ内にデータを格納します
@@ -168,7 +168,7 @@ class WordPressApiClient {
         data: roomData
       };
     } catch (error) {
-      console.error('API Request failed:', error);
+      // console.error('API Request failed:', error);
       if (error instanceof ApiError) {
         throw error;
       }
@@ -216,12 +216,12 @@ class WordPressApiClient {
   private async handleResponse<T>(response: Response): Promise<{ message?: string; data: T }> {
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('API Error Response:', {
-        status: response.status,
-        statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries()),
-        body: errorText
-      });
+      // console.error('API Error Response:', {
+      //   status: response.status,
+      //   statusText: response.statusText,
+      //   headers: Object.fromEntries(response.headers.entries()),
+      //   body: errorText
+      // });
 
       let errorMessage = 'APIリクエストに失敗しました';
       let errorCode = 'API_ERROR';
@@ -231,7 +231,7 @@ class WordPressApiClient {
         errorMessage = errorData.message || errorMessage;
         errorCode = errorData.code || errorCode;
       } catch (e) {
-        console.warn('Failed to parse error response:', e);
+        // console.warn('Failed to parse error response:', e);
       }
 
       throw new ApiError(
@@ -243,7 +243,7 @@ class WordPressApiClient {
 
     try {
       const responseText = await response.text();
-      console.log('Raw response text:', responseText);
+      // console.log('Raw response text:', responseText);
       
       // 空のレスポンスをチェック
       if (!responseText) {
@@ -268,7 +268,7 @@ class WordPressApiClient {
 
       return { data: data as T };
     } catch (error) {
-      console.error('Failed to parse response:', error);
+      // console.error('Failed to parse response:', error);
       throw new ApiError(
         'レスポンスの解析に失敗しました',
         'PARSE_ERROR',

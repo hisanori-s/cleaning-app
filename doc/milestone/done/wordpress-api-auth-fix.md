@@ -150,7 +150,7 @@ private getHeaders(): HeadersInit {
     };
     
     // デバッグ用にヘッダーを出力
-    console.log('Request Headers:', headers);
+    // ログのコメントアウト：console.log('Request Headers:', headers);
     
     return headers;
 }
