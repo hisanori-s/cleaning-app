@@ -58,6 +58,7 @@ graph TD
 ### 4. UIコンポーネント実装
 - 場所: `src/components/room-detail/room-info-box/room-info-box.tsx`
 - タスク:
+  - 物件情報表示コンポーネントの実装
   - 部屋情報表示コンポーネントの実装
   - エラー表示の実装
   - ローディング表示の実装
