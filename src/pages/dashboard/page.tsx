@@ -1,22 +1,15 @@
 import { useState, useEffect } from 'react';
 import { MessageBox } from '@/components/dashboard/message-box/message-box';
-import { RoomListBoxMock } from '@/components/dashboard/room-list-box/room-list-box-mock'; // モックデータ
 import { RoomListBox } from '@/components/dashboard/room-list-box/room-list-box'; // 本番データ
 import type { RoomList, RoomListResponse } from '@/types';
-import mockData from '@/__tests__/mocks/api/properties-rooms.json';
 import { useRoomsList } from '@/hooks/dashboard/useRoomsList';
-import { useAuth } from '@/hooks/use-auth';
 
-// モックデータの型アサーション
-const mockRooms = (mockData as RoomListResponse).mock_rooms_list;
 
 export default function DashboardPage() {
-  const [MockRooms] = useState<RoomList[]>(mockRooms);
   const [error, setError] = useState<Error | null>(null);
 
   // 本番APIから部屋一覧を取得
   const { rooms: apiRooms, isLoading, error: apiError } = useRoomsList();
-  const { user } = useAuth();
 
   // エラーハンドリングの統合
   useEffect(() => {
@@ -71,7 +64,6 @@ export default function DashboardPage() {
         message="このダッシュボードでは、担当する部屋の清掃状況を確認できます。"
       />
       
-
       {/* ステータスごとの部屋一覧 */}
       <RoomListBox
         title="【本番：このタイトルは表示されない】ステータス別部屋一覧"

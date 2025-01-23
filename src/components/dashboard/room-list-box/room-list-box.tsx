@@ -9,38 +9,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { RoomList } from '@/types/room-list';
-import { useMemo, useEffect, useState } from 'react';
-import { getRooms } from '@/api/wordpress';
-import type { ApiResponse } from '@/types/api';
-
-// デバッグ情報表示コンポーネント
-function DebugInfo() {
-  const [roomList, setRoomList] = useState<RoomList[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const userInfo = localStorage.getItem('auth_user');
-  const parsedInfo = userInfo ? JSON.parse(userInfo) : null;
-
-  // ユーザーの担当物件IDがある場合、部屋一覧を取得
-  useEffect(() => {
-    const fetchRooms = async () => {
-      if (parsedInfo?.data?.house_ids) {
-        try {
-          const response: ApiResponse<RoomList[]> = await getRooms(parsedInfo.data.house_ids);
-          if (response.success && response.data) {
-            setRoomList(response.data);
-          }
-        } catch (err) {
-          setError(err instanceof Error ? err.message : '部屋一覧の取得に失敗しました');
-        }
-      }
-    };
-
-    fetchRooms();
-  }, [parsedInfo]);
+import { useMemo } from 'react';
 
 
-}
 
 // 共通のラベルスタイル
 const LABEL_BASE_STYLE = 'px-2 py-1 rounded-full text-sm';
@@ -217,7 +188,6 @@ export function RoomListBox({
 
     return (
       <>
-        <DebugInfo />
         <Card>
           <CardHeader>
             <CardTitle className={titleColor}>{title}</CardTitle>
