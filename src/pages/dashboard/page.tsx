@@ -49,8 +49,8 @@ export default function DashboardPage() {
     );
   }
 
-  // モックと本番データの両方が空の場合
-  if (MockRooms.length === 0 && apiRooms.length === 0) {
+  // 本番データが空の場合
+  if (apiRooms.length === 0) {
     return (
       <div className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-6">ダッシュボード</h1>
@@ -71,20 +71,6 @@ export default function DashboardPage() {
         message="このダッシュボードでは、担当する部屋の清掃状況を確認できます。"
       />
       
-      {/* 【モック】ステータスごとの部屋一覧 */}
-      <RoomListBoxMock
-        title="【モック：このタイトルは表示されない】ステータス別部屋一覧"
-        rooms={MockRooms}
-        groupByStatus={true}
-        onError={(error) => setError(error)}
-      />
-
-      {/* 【モック】全部屋一覧 */}
-      <RoomListBoxMock
-        title="【モック】全部屋一覧"
-        rooms={MockRooms}
-        onError={(error) => setError(error)}
-      />
 
       {/* ステータスごとの部屋一覧 */}
       <RoomListBox
@@ -101,17 +87,6 @@ export default function DashboardPage() {
         onError={(error) => setError(error)}
       />
 
-      {/* デバッグ情報 */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="mt-8 p-4 bg-gray-100 rounded-lg">
-          <h2 className="text-lg font-bold mb-2">デバッグ情報</h2>
-          <div className="space-y-2">
-            <p>ユーザー情報: {JSON.stringify(user, null, 2)}</p>
-            <p>担当物件ID: {JSON.stringify(user?.house_ids, null, 2)}</p>
-            <p>API部屋データ: {JSON.stringify(apiRooms, null, 2)}</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 } 

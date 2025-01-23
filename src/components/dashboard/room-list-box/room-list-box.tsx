@@ -14,7 +14,6 @@ import { getRooms } from '@/api/wordpress';
 import type { ApiResponse } from '@/types/api';
 
 // デバッグ情報表示コンポーネント
-const DebugMode = true;
 function DebugInfo() {
   const [roomList, setRoomList] = useState<RoomList[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -40,40 +39,7 @@ function DebugInfo() {
     fetchRooms();
   }, [parsedInfo]);
 
-  if (!DebugMode) return null;
 
-  if (!userInfo) {
-    return (
-      <div className="bg-yellow-100 p-4 mb-4 rounded-md">
-        <h3 className="font-bold text-yellow-800">【デバッグ情報】</h3>
-        <p className="text-yellow-700">ユーザー情報が見つかりません</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-blue-100 p-4 mb-4 rounded-md space-y-4">
-      <div>
-        <h3 className="font-bold text-blue-800">【ユーザー情報】</h3>
-        <pre className="text-sm text-blue-700 whitespace-pre-wrap">
-          {JSON.stringify(parsedInfo, null, 2)}
-        </pre>
-      </div>
-
-      <div>
-        <h3 className="font-bold text-blue-800">【担当物件の部屋一覧】</h3>
-        {error ? (
-          <p className="text-red-500">{error}</p>
-        ) : roomList ? (
-          <pre className="text-sm text-blue-700 whitespace-pre-wrap">
-            {JSON.stringify(roomList, null, 2)}
-          </pre>
-        ) : (
-          <p className="text-blue-700">読み込み中...</p>
-        )}
-      </div>
-    </div>
-  );
 }
 
 // 共通のラベルスタイル
