@@ -12,6 +12,7 @@ import type { RoomList } from '../types/room-list';
 const API_BASE_URL = import.meta.env.VITE_WP_API_BASE_URL;
 const API_USERS_ENDPOINT = import.meta.env.VITE_WP_API_USERS_ENDPOINT;
 const API_ROOMS_LIST_ENDPOINT = import.meta.env.VITE_WP_API_ROOMS_LIST_ENDPOINT;
+const API_ROOMS_DETAIL_ENDPOINT = import.meta.env.VITE_WP_API_ROOMS_DETAIL_ENDPOINT;
 const API_KEY = import.meta.env.VITE_WP_API_KEY;
 
 /**
@@ -54,7 +55,10 @@ class WordPressApiClient {
       const result = await this.handleResponse<{ message: string; data: RoomList[] }>(response);
       console.log('API Response:', result);
 
-      if (!result.data?.data) {
+      // WordPressのレスポンス構造に合わせて修正
+      const roomsData = result.data?.data || result.data;
+      
+      if (!roomsData || !Array.isArray(roomsData)) {
         throw new ApiError(
           '部屋情報の取得に失敗しました',
           'PARSE_ERROR',
@@ -64,7 +68,7 @@ class WordPressApiClient {
 
       return {
         success: true,
-        data: result.data.data
+        data: roomsData
       };
     } catch (error) {
       console.error('API Request failed:', error);
@@ -112,12 +116,62 @@ class WordPressApiClient {
 
   // 部屋詳細を取得する
   async getRoomDetails(propertyId: number, roomNumber: string): Promise<ApiResponse<RoomDetail>> {
-    // 内容はAIがこれから作る
-    // エンドポイント　VITE_WP_API_ROOMS_DETAIL_ENDPOINT=/cleaning-management/v1/room-detail
-    //   【参考情報】クエリパラメータ
-    //   * house_id: 物件ID (数値)
-    //   * room_number: 部屋番号 (文字列)
-    //   * 例: ?house_id=10&room_number=101
+    const requestUrl = `${API_BASE_URL}${API_ROOMS_DETAIL_ENDPOINT}`;
+    console.log('API Request:', {
+      url: requestUrl,
+      headers: this.getHeaders(),
+      params: { house_id: propertyId, room_number: roomNumber }
+    });
+
+    try {
+      // クエリパラメータを構築
+      const queryParams = new URLSearchParams({
+        house_id: propertyId.toString(),
+        room_number: roomNumber
+      }).toString();
+
+      const response = await fetch(`${requestUrl}?${queryParams}`, {
+        method: 'GET',
+        headers: this.getHeaders()
+      });
+      
+      // レスポンスの詳細をログ出力
+      console.log('Raw API Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+      
+      const result = await this.handleResponse<{ message: string; data: RoomDetail }>(response);
+      console.log('Parsed API Response:', result);
+
+      // WordPressのレスポンス構造に合わせて修正
+      // 通常、WordPressのREST APIは直接データを返すか、dataプロパティ内にデータを格納します
+      const roomData = result.data?.data || result.data;
+      
+      if (!roomData) {
+        throw new ApiError(
+          '部屋詳細情報の取得に失敗しました',
+          'PARSE_ERROR',
+          500
+        );
+      }
+
+      return {
+        success: true,
+        data: roomData
+      };
+    } catch (error) {
+      console.error('API Request failed:', error);
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(
+        '部屋詳細情報の取得に失敗しました',
+        'FETCH_ERROR',
+        500
+      );
+    }
   }
 
   async submitReport(report: Omit<CleaningReport, 'id'>): Promise<ApiResponse<CleaningReport>> {
@@ -153,8 +207,7 @@ class WordPressApiClient {
     return headers;
   }
 
-  private async handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
-    // エラーレスポンスの詳細なログ
+  private async handleResponse<T>(response: Response): Promise<{ message?: string; data: T }> {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('API Error Response:', {
@@ -183,11 +236,25 @@ class WordPressApiClient {
     }
 
     try {
-      const data = await response.json();
-      return {
-        success: true,
-        data: data
-      };
+      const responseText = await response.text();
+      console.log('Raw response text:', responseText);
+      
+      // 空のレスポンスをチェック
+      if (!responseText) {
+        return { data: {} as T };
+      }
+
+      const data = JSON.parse(responseText);
+      
+      // WordPressのレスポンス形式に対応
+      if (typeof data === 'object' && data !== null) {
+        return {
+          message: data.message,
+          data: data.data || data
+        };
+      }
+
+      return { data: data as T };
     } catch (error) {
       console.error('Failed to parse response:', error);
       throw new ApiError(
