@@ -134,12 +134,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /**
    * ログアウト処理
+   * すべての認証関連の状態とキャッシュをクリア
    */
   const logout = () => {
+    // 認証状態をリセット
     setIsAuthenticated(false);
     setUser(null);
-    setUserList([]);  // ユーザーリストもクリア
+    setUserList([]);
+    
+    // キャッシュをクリア
     clearAuthCache();
+    
+    // セッションストレージをクリア
+    sessionStorage.clear();
+    
+    // ローカルストレージの認証関連データをクリア
+    Object.keys(localStorage).forEach(key => {
+      if (key.includes('auth') || key.includes('user') || key.includes('token')) {
+        localStorage.removeItem(key);
+      }
+    });
   };
 
   const auth = {
