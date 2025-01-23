@@ -82,7 +82,7 @@ function get_room_detail_data($request)
                 continue;
             }
             $now_id = $room["customer-id"];
-            $room_key = $room["room-key"];
+            $room_key = $room["room-key"] ? $room["room-key"] : 'なし';
 
             $customer_data1 = get_field('customer-data1', $now_id);
             $move_check = $customer_data1["move-check"];
