@@ -37,9 +37,11 @@ class WordPressApiClient {
    */
   async getRooms(houseIds: number[]): Promise<ApiResponse<RoomList[]>> {
     const requestUrl = `${API_BASE_URL}${API_ROOMS_LIST_ENDPOINT}`;
-    console.log('Requesting rooms from:', requestUrl);
-    console.log('Request headers:', this.getHeaders());
-    console.log('Request params:', { house_ids: houseIds });
+    console.log('API Request:', {
+      url: requestUrl,
+      headers: this.getHeaders(),
+      params: { house_ids: houseIds }
+    });
 
     try {
       // クエリパラメータを構築
@@ -50,13 +52,16 @@ class WordPressApiClient {
       });
       
       const result = await this.handleResponse<{ message: string; data: RoomList[] }>(response);
+      console.log('API Response:', result);
+
       if (!result.data?.data) {
         throw new ApiError(
-          'Invalid response format: missing data',
+          '部屋情報の取得に失敗しました',
           'PARSE_ERROR',
           500
         );
       }
+
       return {
         success: true,
         data: result.data.data
@@ -67,7 +72,7 @@ class WordPressApiClient {
         throw error;
       }
       throw new ApiError(
-        'Failed to fetch rooms',
+        '部屋情報の取得に失敗しました',
         'FETCH_ERROR',
         500
       );
@@ -80,8 +85,10 @@ class WordPressApiClient {
    */
   async getUsers(): Promise<ApiResponse<User[]>> {
     const requestUrl = `${API_BASE_URL}${API_USERS_ENDPOINT}`;
-    console.log('Requesting users from:', requestUrl);
-    console.log('Request headers:', this.getHeaders());
+    console.log('API Request:', {
+      url: requestUrl,
+      headers: this.getHeaders()
+    });
 
     try {
       const response = await fetch(requestUrl, {
@@ -96,7 +103,7 @@ class WordPressApiClient {
         throw error;
       }
       throw new ApiError(
-        'Failed to fetch users',
+        'ユーザー情報の取得に失敗しました',
         'FETCH_ERROR',
         500
       );
@@ -115,7 +122,7 @@ class WordPressApiClient {
         throw error;
       }
       throw new ApiError(
-        'Failed to fetch room details',
+        '部屋の詳細情報の取得に失敗しました',
         'FETCH_ERROR',
         500
       );
@@ -135,7 +142,7 @@ class WordPressApiClient {
         throw error;
       }
       throw new ApiError(
-        'Failed to submit report',
+        '清掃レポートの送信に失敗しました',
         'SUBMIT_ERROR',
         500
       );
@@ -166,7 +173,7 @@ class WordPressApiClient {
         body: errorText
       });
 
-      let errorMessage = 'API request failed';
+      let errorMessage = 'APIリクエストに失敗しました';
       let errorCode = 'API_ERROR';
 
       try {
@@ -193,7 +200,7 @@ class WordPressApiClient {
     } catch (error) {
       console.error('Failed to parse response:', error);
       throw new ApiError(
-        'Invalid response format',
+        'レスポンスの解析に失敗しました',
         'PARSE_ERROR',
         500
       );

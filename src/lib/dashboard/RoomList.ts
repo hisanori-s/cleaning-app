@@ -1,5 +1,4 @@
 import type { RoomList } from '../../types/room-list';
-import type { ApiResponse } from '../../types/api';
 
 type ApiRoomData = {
   house_id: number;

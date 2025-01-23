@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react';
 import { getRooms } from '../../api/wordpress';
 import type { RoomList } from '../../types/room-list';
-import { transformRoomData } from '../../lib/dashboard/RoomList';
+import { useAuth } from '../use-auth';
 
 /**
  * 部屋一覧を取得・管理するカスタムフック
- * @param houseIds 物件IDの配列
  * @returns {Object} 部屋一覧のステートと読み込み状態
  */
-export const useRoomsList = (houseIds: number[]) => {
+export const useRoomsList = () => {
   const [rooms, setRooms] = useState<RoomList[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  
+  // 認証情報から担当物件IDを取得
+  const { user } = useAuth();
+  const houseIds = user?.house_ids || [];
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -23,15 +26,14 @@ export const useRoomsList = (houseIds: number[]) => {
         const response = await getRooms(houseIds);
         
         if (!response.success || !response.data) {
-          throw new Error('Failed to fetch rooms data');
+          throw new Error('部屋情報の取得に失敗しました');
         }
 
-        // APIレスポンスを表示用データに変換
-        const transformedRooms = transformRoomData(response.data);
-        setRooms(transformedRooms);
+        // APIレスポンスをそのまま使用
+        setRooms(response.data);
       } catch (err) {
         console.error('Error fetching rooms:', err);
-        setError(err instanceof Error ? err : new Error('Unknown error occurred'));
+        setError(err instanceof Error ? err : new Error('部屋情報の取得中にエラーが発生しました'));
       } finally {
         setIsLoading(false);
       }
