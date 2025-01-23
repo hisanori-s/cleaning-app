@@ -24,7 +24,7 @@ export interface RoomList {
   /** 早期退去フラグ */
   early_leave: boolean;
   /** 部屋のステータスラベル */
-  'status-label': RoomStatusLabel;
+  'status_label': RoomStatusLabel;
 }
 
 /**

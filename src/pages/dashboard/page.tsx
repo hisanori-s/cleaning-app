@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MessageBox } from '@/components/dashboard/message-box/message-box';
 import { RoomListBox } from '@/components/dashboard/room-list-box/room-list-box'; // 本番データ
-import type { RoomList, RoomListResponse } from '@/types';
 import { useRoomsList } from '@/hooks/dashboard/useRoomsList';
 
 
