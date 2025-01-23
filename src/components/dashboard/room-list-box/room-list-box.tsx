@@ -28,6 +28,7 @@ export interface RoomListBoxProps {
   titleColor?: string;
   onError?: (error: Error) => void;
   groupByStatus?: boolean;
+  isLoading?: boolean;
 }
 
 interface StatusGroup {
@@ -41,7 +42,8 @@ export function RoomListBox({
   rooms, 
   titleColor, 
   onError,
-  groupByStatus = false 
+  groupByStatus = false,
+  isLoading = false
 }: RoomListBoxProps) {
   const navigate = useNavigate();
 
@@ -90,6 +92,37 @@ export function RoomListBox({
 
     return Object.values(groups);
   }, [validRooms, groupByStatus]);
+
+  // ローディング表示
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className={titleColor}>{title}</CardTitle>
+        </CardHeader>
+        <div className="flex flex-col items-center justify-center p-6">
+          <video autoPlay loop muted className="w-16 h-16">
+            <source src="/loading.webm" type="video/webm" />
+          </video>
+          <p className="mt-4 text-gray-500">読み込み中...</p>
+        </div>
+      </Card>
+    );
+  }
+
+  // データなし表示
+  if (!isLoading && validRooms.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className={titleColor}>{title}</CardTitle>
+        </CardHeader>
+        <div className="text-center p-6 text-gray-500">
+          現在表示対象の部屋がありません
+        </div>
+      </Card>
+    );
+  }
 
   const renderRoomTable = (roomsToRender: RoomList[]) => (
     <Table>

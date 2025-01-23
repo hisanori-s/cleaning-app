@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { MessageBox } from '@/components/dashboard/message-box/message-box';
 import { RoomListBox } from '@/components/dashboard/room-list-box/room-list-box'; // 本番データ
 import { useRoomsList } from '@/hooks/dashboard/useRoomsList';
+import { Card } from '@/components/ui/card';
 
 
 export default function DashboardPage() {
@@ -21,10 +22,14 @@ export default function DashboardPage() {
     return (
       <div className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-6">ダッシュボード</h1>
-        <MessageBox
-          title="データ読み込み中"
-          message="データを読み込んでいます..."
-        />
+        <Card className="p-6">
+          <div className="flex flex-col items-center justify-center">
+            <video autoPlay loop muted className="w-16 h-16">
+              <source src="/loading.webm" type="video/webm" />
+            </video>
+            <p className="mt-4 text-gray-500">読み込み中...</p>
+          </div>
+        </Card>
       </div>
     );
   }
@@ -46,10 +51,11 @@ export default function DashboardPage() {
     return (
       <div className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-6">ダッシュボード</h1>
-        <MessageBox
-          title="部屋情報"
-          message="現在表示対象の部屋がありません"
-        />
+        <Card className="p-6">
+          <div className="text-center text-gray-500">
+            現在表示対象の部屋がありません
+          </div>
+        </Card>
       </div>
     );
   }
@@ -69,6 +75,7 @@ export default function DashboardPage() {
         rooms={apiRooms}
         groupByStatus={true}
         onError={(error) => setError(error)}
+        isLoading={isLoading}
       />
 
       {/* 全部屋一覧 */}
@@ -76,6 +83,7 @@ export default function DashboardPage() {
         title="【本番】全部屋一覧"
         rooms={apiRooms}
         onError={(error) => setError(error)}
+        isLoading={isLoading}
       />
 
     </div>
