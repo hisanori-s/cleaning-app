@@ -100,7 +100,13 @@ class WordPressApiClient {
         headers: this.getHeaders()
       });
       
-      return await this.handleResponse<User[]>(response);
+      const result = await this.handleResponse<User[]>(response);
+      
+      // ユーザー認証用のレスポンスは直接データを返す
+      return {
+        success: true,
+        data: result.data
+      };
     } catch (error) {
       console.error('API Request failed:', error);
       if (error instanceof ApiError) {
@@ -248,10 +254,16 @@ class WordPressApiClient {
       
       // WordPressのレスポンス形式に対応
       if (typeof data === 'object' && data !== null) {
-        return {
-          message: data.message,
-          data: data.data || data
-        };
+        if (data.message && data.data) {
+          // message と data プロパティがある場合
+          return {
+            message: data.message,
+            data: data.data
+          };
+        } else {
+          // 直接データが返される場合
+          return { data: data as T };
+        }
       }
 
       return { data: data as T };
