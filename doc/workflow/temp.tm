@@ -56,3 +56,40 @@ C:getRooms関数にそのhouse_idsを渡している
 
 今回のコードでちゃんとAPI空データが取得できているのか、それが表示用のコンポーネントにわたっているのかをデバッグウィンドウを作成して表示させたい。
 適切な場所にデバッグ窓を作成し、ブラウザでユーザーが目視できるようにして。
+
+何度か試しているけど、毎回ログイン機能が潰されるので気を付けて。
+先程はpage.tsxの中の何かを書き換えた影響でログイン機能が潰されました。
+また、型の定義はsrc/types/room-list.tsの中にあるはずなのでそれ利用して。
+
+戻り値のデータのサンプル
+```
+{
+    "message": "success",
+    "data": [
+        {
+            "house_id": 10,
+            "house_name": "LAFESTA新宿",
+            "room_number": "302",
+            "moveout_date": "2024-09-30",
+            "vacancy_date": "2024-10-07",
+            "early_leave": false,
+            "status_label": {
+                "color": "#FF4444",
+                "text": "期限超過"
+            }
+        },
+        {
+            "house_id": 10,
+            "house_name": "LAFESTA新宿",
+            "room_number": "305",
+            "moveout_date": "2024-10-25",
+            "vacancy_date": "2024-11-01",
+            "early_leave": false,
+            "status_label": {
+                "color": "#FF4444",
+                "text": "期限超過"
+            }
+        }
+    ]
+}
+```
