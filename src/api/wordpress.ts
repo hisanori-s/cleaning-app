@@ -1,5 +1,4 @@
 import { User, RoomDetail, CleaningReport, ApiResponse } from '../types/index';
-import roomDetailMock from '../__tests__/mocks/api/room-detail.json';
 import type { RoomList } from '../types/room-list';
 // エンドポイントの型
 // fetch('https://your-site.com/wp-json/cleaning-management/v1/users', {
@@ -11,12 +10,9 @@ import type { RoomList } from '../types/room-list';
 
 // APIエンドポイントの設定
 const API_BASE_URL = import.meta.env.VITE_WP_API_BASE_URL;
-const API_NAMESPACE = import.meta.env.VITE_WP_API_NAMESPACE;
 const API_USERS_ENDPOINT = import.meta.env.VITE_WP_API_USERS_ENDPOINT;
 const API_ROOMS_LIST_ENDPOINT = import.meta.env.VITE_WP_API_ROOMS_LIST_ENDPOINT;
 const API_KEY = import.meta.env.VITE_WP_API_KEY;
-// 開発環境判定は他の機能で必要な場合があるため残す
-const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
 
 /**
  * APIエラーを表現するカスタムエラークラス
@@ -32,30 +28,7 @@ class ApiError extends Error {
   }
 }
 
-/**
- * モックデータプロバイダーのインターフェース
- */
-interface MockDataProvider {
-  getRoomDetail: (propertyId: number, roomNumber: string) => ApiResponse<RoomDetail>;
-}
-
-/**
- * デフォルトのモックデータプロバイダー
- */
-const defaultMockProvider: MockDataProvider = {
-  getRoomDetail: (propertyId: number, roomNumber: string) => ({
-    success: true,
-    data: roomDetailMock.mock_room_detail
-  }),
-};
-
-interface LoginCredentials {
-  username: string;
-  password: string;
-}
-
 class WordPressApiClient {
-  private token: string | null = null;
 
   /**
    * 部屋一覧を取得する
