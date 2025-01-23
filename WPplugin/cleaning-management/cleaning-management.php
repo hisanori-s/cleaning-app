@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Cleaning Management API
+ * Plugin Name: Add-on_Cleaning Management API
  * Description: シェアハウス清掃管理システムのREST APIを提供するプラグイン
  * Version: 1.0.0
  * Author: Sakurai
