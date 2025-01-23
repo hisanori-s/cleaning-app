@@ -1,57 +1,16 @@
-import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ReportFormBox } from '../../../../components/report/report-form-box/report-form-box';
-import { uploadReport, uploadImage } from '../../../../api/wordpress';
-import type { CleaningReport } from '../../../../types';
+// 作成済み報告書一覧を確認できるページ
+// 表示のみで、基本的にビジネスロジックは持たせない。
 
-export default function ReportFormPage() {
-  const { roomId } = useParams();
-  const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+// 機能としては
+// ページ読み込み時に対象ユーザーに紐づけられた報告書を一覧で表示し、詳細を見たいレポートはクリックでSPAのように表示切替。
+// 対象のレポート情報の取得はクリック時にAPIを叩いて取得。
 
-  const handleSubmit = async (report: Partial<CleaningReport>) => {
-    if (!roomId) return;
-
-    try {
-      setIsSubmitting(true);
-      
-      // 画像のアップロード
-      const imageUrls = await Promise.all(
-        report.images?.map(async (image) => {
-          const response = await uploadImage(image);
-          return response.success && response.data ? response.data.url : '';
-        }) ?? []
-      );
-
-      // レポートの作成
-      const cleaningReport: Omit<CleaningReport, 'id'> = {
-        roomId: parseInt(roomId, 10),
-        cleanerId: 1, // 開発用の固定値
-        date: report.date ?? new Date().toISOString(),
-        checklist: report.checklist ?? {},
-        comments: report.comments ?? '',
-        images: imageUrls.filter(Boolean),
-        status: 'submitted',
-      };
-
-      const response = await uploadReport(cleaningReport);
-      if (response.success) {
-        navigate('/');
-      }
-    } catch (error) {
-      console.error('Report submission failed:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">清掃報告書作成</h1>
-      <ReportFormBox
-        onSubmit={handleSubmit}
-        isSubmitting={isSubmitting}
-      />
-    </div>
-  );
-} 
+// ロード時はローディングアニメーションを利用
+{/* <Card className="p-6">
+<div className="flex flex-col items-center justify-center">
+  <video autoPlay loop muted className="w-16 h-16">
+    <source src="/loading.webm" type="video/webm" />
+  </video>
+  <p className="mt-4 text-gray-500">読み込み中...</p>
+</div>
+</Card> */}
