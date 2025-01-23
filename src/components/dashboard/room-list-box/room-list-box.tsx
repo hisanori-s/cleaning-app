@@ -56,9 +56,9 @@ export function RoomListBox({
             !room.moveout_date ||
             !room.vacancy_date || 
             room.early_leave === undefined ||
-            !room['status-label'] ||
-            !room['status-label'].color ||
-            !room['status-label'].text) {
+            !room['status_label'] ||
+            !room['status_label'].color ||
+            !room['status_label'].text) {
           return false;
         }
         return true;
@@ -77,11 +77,11 @@ export function RoomListBox({
 
     const groups: Record<string, StatusGroup> = {};
     validRooms.forEach(room => {
-      const statusText = room['status-label'].text;
+      const statusText = room['status_label'].text;
       if (!groups[statusText]) {
         groups[statusText] = {
           label: statusText,
-          color: room['status-label'].color,
+          color: room['status_label'].color,
           rooms: []
         };
       }
@@ -128,11 +128,11 @@ export function RoomListBox({
               <span
                 className={LABEL_BASE_STYLE}
                 style={{
-                  color: room['status-label'].color,
-                  backgroundColor: `${room['status-label'].color}33`
+                  color: room['status_label'].color,
+                  backgroundColor: `${room['status_label'].color}33`
                 }}
               >
-                {room['status-label'].text}
+                {room['status_label'].text}
               </span>
               {room.early_leave && (
                 <span

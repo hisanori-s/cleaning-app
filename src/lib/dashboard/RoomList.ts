@@ -26,7 +26,7 @@ export const transformRoomData = (apiData: ApiRoomData[]): RoomList[] => {
     moveout_date: room.moveout_date,
     vacancy_date: room.vacancy_date,
     early_leave: room.early_leave,
-    'status-label': {
+    'status_label': {
       color: room.status_label.color,
       text: room.status_label.text
     }
