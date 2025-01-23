@@ -13,6 +13,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  
+  /* デバッグ用の状態管理（一時的に非表示）
   const [debugInfo, setDebugInfo] = useState<{
     userList?: any[];
     loginAttempt?: { id: string; success: boolean };
@@ -39,6 +41,7 @@ export default function LoginPage() {
     };
     fetchDebugUsers();
   }, []);
+  */
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -47,6 +50,7 @@ export default function LoginPage() {
 
     try {
       const success = await login(loginId, password);
+      /* デバッグ用（一時的に非表示）
       setDebugInfo(prev => ({
         ...prev,
         loginAttempt: {
@@ -54,6 +58,7 @@ export default function LoginPage() {
           success
         }
       }));
+      */
 
       if (success) {
         navigate('/');
@@ -63,10 +68,12 @@ export default function LoginPage() {
     } catch (error) {
       setError('ログインに失敗しました。もう一度お試しください');
       console.error('Login error:', error);
+      /* デバッグ用（一時的に非表示）
       setDebugInfo(prev => ({
         ...prev,
         error: error
       }));
+      */
     } finally {
       setIsLoading(false);
     }
@@ -125,8 +132,8 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        {/* デバッグ情報 */}
-        <Card className="w-full">
+        {/* デバッグ情報（一時的に非表示） */}
+        {/* <Card className="w-full">
           <CardHeader>
             <CardTitle>デバッグ情報</CardTitle>
           </CardHeader>
@@ -165,7 +172,7 @@ export default function LoginPage() {
               )}
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </div>
   );
