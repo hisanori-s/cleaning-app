@@ -110,23 +110,14 @@ class WordPressApiClient {
     }
   }
 
-
-  async getRoom(propertyId: number, roomNumber: string): Promise<ApiResponse<RoomDetail>> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/rooms/${propertyId}/${roomNumber}`, {
-        headers: this.getHeaders(),
-      });
-      return this.handleResponse<RoomDetail>(response);
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(
-        '部屋の詳細情報の取得に失敗しました',
-        'FETCH_ERROR',
-        500
-      );
-    }
+  // 部屋詳細を取得する
+  async getRoomDetails(propertyId: number, roomNumber: string): Promise<ApiResponse<RoomDetail>> {
+    // 内容はAIがこれから作る
+    // エンドポイント　VITE_WP_API_ROOMS_DETAIL_ENDPOINT=/cleaning-management/v1/room-detail
+    //   【参考情報】クエリパラメータ
+    //   * house_id: 物件ID (数値)
+    //   * room_number: 部屋番号 (文字列)
+    //   * 例: ?house_id=10&room_number=101
   }
 
   async submitReport(report: Omit<CleaningReport, 'id'>): Promise<ApiResponse<CleaningReport>> {
@@ -213,5 +204,5 @@ const client = new WordPressApiClient();
 // APIメソッドのエクスポート
 export const getUsers = () => client.getUsers();
 export const getRooms = (houseIds: number[]) => client.getRooms(houseIds);
-export const getRoomDetails = (propertyId: number, roomNumber: string) => client.getRoom(propertyId, roomNumber);
+export const getRoomDetails = (propertyId: number, roomNumber: string) => client.getRoomDetails(propertyId, roomNumber);
 export const uploadReport = (report: Omit<CleaningReport, 'id'>) => client.submitReport(report);

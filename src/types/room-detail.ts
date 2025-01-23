@@ -1,27 +1,26 @@
 /**
- * 部屋詳細の状態を表す型
+ * 部屋のステータスラベルを表す型
  */
-export interface RoomDetailStatus {
-  'label-color': string;
-  'label-text': string;
+export interface StatusLabel {
+  color: string;
+  text: string;
 }
 
 /**
  * 部屋詳細情報の型定義
- * WordPressから取得する詳細な部屋情報を表現します
  */
 export interface RoomDetail {
-  id: number;
-  property_id: number;
-  property_name: string;
-  property_address: string;
+  house_id: number;
+  house_name: string;
   room_number: string;
-  vacancy_date: string;
-  cleaning_deadline: string;
-  room_key_number: string;
-  entrance_key_number: string;
-  notes: string;
-  status: RoomDetailStatus;
+  moveout_date: string | '';
+  vacancy_date: string | '';
+  early_leave: boolean;
+  status_label: StatusLabel;
+  room_key: string;
+  building_key: string;
+  address: string;
+  cleaner_note: string;
 }
 
 /**
@@ -29,4 +28,4 @@ export interface RoomDetail {
  */
 export interface RoomDetailResponse {
   mock_room_detail: RoomDetail;
-} 
+}
