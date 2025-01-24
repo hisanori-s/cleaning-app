@@ -1,6 +1,7 @@
 import { User, RoomDetail, CleaningReport, ApiResponse } from '../types/index';
 import type { RoomList } from '../types/room-list';
 import type { CleaningReportItem, CleaningReportListResponse } from '../types/report-list';
+import type { CleaningReportDetailResponse, CleaningReportDetail } from '../types/report-detail';
 // エンドポイントの型
 // fetch('https://your-site.com/wp-json/cleaning-management/v1/users', {
 //   headers: {
@@ -15,6 +16,7 @@ const API_USERS_ENDPOINT = import.meta.env.VITE_WP_API_USERS_ENDPOINT;
 const API_ROOMS_LIST_ENDPOINT = import.meta.env.VITE_WP_API_ROOMS_LIST_ENDPOINT;
 const API_ROOMS_DETAIL_ENDPOINT = import.meta.env.VITE_WP_API_ROOMS_DETAIL_ENDPOINT;
 const API_CLEANING_REPORT_LIST_ENDPOINT = import.meta.env.VITE_WP_API_CLEANING_REPORT_LIST_ENDPOINT;
+const API_CLEANING_REPORT_DETAIL_ENDPOINT = import.meta.env.VITE_WP_API_CLEANING_REPORT_DETAIL_ENDPOINT;
 const API_KEY = import.meta.env.VITE_WP_API_KEY;
 
 /**
@@ -189,7 +191,11 @@ class WordPressApiClient {
         headers: this.getHeaders(),
         body: JSON.stringify(report),
       });
-      return this.handleResponse<CleaningReport>(response);
+      const result = await this.handleResponse<{ message: string; data: CleaningReport }>(response);
+      return {
+        success: true,
+        data: result.data.data
+      };
     } catch (error) {
       if (error instanceof ApiError) {
         throw error;
@@ -218,18 +224,80 @@ class WordPressApiClient {
         headers: this.getHeaders()
       });
       
-      const result = await this.handleResponse<CleaningReportListResponse>(response);
+      console.log('Clean Report List - Raw Response:', await response.clone().text());
+      
+      const result = await this.handleResponse<CleaningReportItem[]>(response);
+      console.log('Clean Report List - Parsed Result:', result);
+
+      // レスポンスの型を確認
+      if (!result.data || !Array.isArray(result.data)) {
+        throw new ApiError(
+          '清掃報告書一覧の取得に失敗しました',
+          'PARSE_ERROR',
+          500
+        );
+      }
 
       return {
         success: true,
         data: result.data
       };
     } catch (error) {
+      console.error('Clean Report List - Error:', error);
       if (error instanceof ApiError) {
         throw error;
       }
       throw new ApiError(
         '清掃報告書一覧の取得に失敗しました',
+        'FETCH_ERROR',
+        500
+      );
+    }
+  }
+
+  /**
+   * 清掃報告書の詳細を取得する
+   * @param reportId 清掃報告書のID
+   * @returns Promise<ApiResponse<CleaningReportDetail>>
+   */
+  async getCleaningReportDetail(reportId: number): Promise<ApiResponse<CleaningReportDetail>> {
+    const requestUrl = `${API_BASE_URL}${API_CLEANING_REPORT_DETAIL_ENDPOINT}`;
+
+    try {
+      // クエリパラメータを構築
+      const queryParams = new URLSearchParams({
+        report_id: reportId.toString()
+      }).toString();
+
+      const response = await fetch(`${requestUrl}?${queryParams}`, {
+        method: 'GET',
+        headers: this.getHeaders()
+      });
+      
+      console.log('Clean Report Detail - Raw Response:', await response.clone().text());
+      
+      const result = await this.handleResponse<CleaningReportDetail>(response);
+      console.log('Clean Report Detail - Parsed Result:', result);
+
+      if (!result.data) {
+        throw new ApiError(
+          '清掃報告書の詳細情報が見つかりませんでした',
+          'NOT_FOUND',
+          404
+        );
+      }
+
+      return {
+        success: true,
+        data: result.data
+      };
+    } catch (error) {
+      console.error('Clean Report Detail - Error:', error);
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(
+        '清掃報告書の詳細情報の取得に失敗しました',
         'FETCH_ERROR',
         500
       );
@@ -290,7 +358,7 @@ class WordPressApiClient {
       
       // WordPressのレスポンス形式に対応
       if (typeof data === 'object' && data !== null) {
-        if (data.message && data.data) {
+        if ('message' in data && 'data' in data) {
           // message と data プロパティがある場合
           return {
             message: data.message,
@@ -322,3 +390,4 @@ export const getRooms = (houseIds: number[]) => client.getRooms(houseIds);
 export const getRoomDetails = (propertyId: number, roomNumber: string) => client.getRoomDetails(propertyId, roomNumber);
 export const uploadReport = (report: Omit<CleaningReport, 'id'>) => client.submitReport(report);
 export const getCleaningReports = (houseIds: number[]) => client.getCleaningReports(houseIds);
+export const getCleaningReportDetail = (reportId: number) => client.getCleaningReportDetail(reportId);
