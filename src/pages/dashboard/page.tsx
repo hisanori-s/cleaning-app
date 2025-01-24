@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MessageBox } from '@/components/dashboard/message-box/message-box';
 import { RoomListBox } from '@/components/dashboard/room-list-box/room-list-box'; // 本番データ
 import { useRoomsList } from '@/hooks/dashboard/useRoomsList';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ClipboardList } from 'lucide-react';
 
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const [error, setError] = useState<Error | null>(null);
 
   // 本番APIから部屋一覧を取得
@@ -17,6 +21,10 @@ export default function DashboardPage() {
       setError(apiError);
     }
   }, [apiError]);
+
+  const handleReportListClick = () => {
+    navigate('/report');
+  };
 
   if (isLoading) {
     return (
@@ -62,7 +70,16 @@ export default function DashboardPage() {
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <h1 className="text-2xl font-bold mb-6">ダッシュボード</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">ダッシュボード</h1>
+        <Button
+          onClick={handleReportListClick}
+          className="flex items-center"
+        >
+          <ClipboardList className="mr-2 h-4 w-4" />
+          作成済み報告書一覧
+        </Button>
+      </div>
 
       <MessageBox
         title="清掃管理システムへようこそ"

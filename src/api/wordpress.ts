@@ -1,5 +1,6 @@
 import { User, RoomDetail, CleaningReport, ApiResponse } from '../types/index';
 import type { RoomList } from '../types/room-list';
+import type { CleaningReportItem, CleaningReportListResponse } from '../types/report-list';
 // エンドポイントの型
 // fetch('https://your-site.com/wp-json/cleaning-management/v1/users', {
 //   headers: {
@@ -13,6 +14,7 @@ const API_BASE_URL = import.meta.env.VITE_WP_API_BASE_URL;
 const API_USERS_ENDPOINT = import.meta.env.VITE_WP_API_USERS_ENDPOINT;
 const API_ROOMS_LIST_ENDPOINT = import.meta.env.VITE_WP_API_ROOMS_LIST_ENDPOINT;
 const API_ROOMS_DETAIL_ENDPOINT = import.meta.env.VITE_WP_API_ROOMS_DETAIL_ENDPOINT;
+const API_CLEANING_REPORT_LIST_ENDPOINT = import.meta.env.VITE_WP_API_CLEANING_REPORT_LIST_ENDPOINT;
 const API_KEY = import.meta.env.VITE_WP_API_KEY;
 
 /**
@@ -200,6 +202,40 @@ class WordPressApiClient {
     }
   }
 
+  /**
+   * 清掃報告書一覧を取得する
+   * @param houseIds 物件IDの配列
+   * @returns Promise<ApiResponse<CleaningReportItem[]>>
+   */
+  async getCleaningReports(houseIds: number[]): Promise<ApiResponse<CleaningReportItem[]>> {
+    const requestUrl = `${API_BASE_URL}${API_CLEANING_REPORT_LIST_ENDPOINT}`;
+
+    try {
+      // クエリパラメータを構築
+      const queryParams = houseIds.map(id => `house_ids[]=${id}`).join('&');
+      const response = await fetch(`${requestUrl}?${queryParams}`, {
+        method: 'GET',
+        headers: this.getHeaders()
+      });
+      
+      const result = await this.handleResponse<CleaningReportListResponse>(response);
+
+      return {
+        success: true,
+        data: result.data
+      };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(
+        '清掃報告書一覧の取得に失敗しました',
+        'FETCH_ERROR',
+        500
+      );
+    }
+  }
+
   private getHeaders(isFormData = false): HeadersInit {
     const headers: HeadersInit = {
       'X-API-Key': API_KEY || 'test123'
@@ -285,3 +321,4 @@ export const getUsers = () => client.getUsers();
 export const getRooms = (houseIds: number[]) => client.getRooms(houseIds);
 export const getRoomDetails = (propertyId: number, roomNumber: string) => client.getRoomDetails(propertyId, roomNumber);
 export const uploadReport = (report: Omit<CleaningReport, 'id'>) => client.submitReport(report);
+export const getCleaningReports = (houseIds: number[]) => client.getCleaningReports(houseIds);
