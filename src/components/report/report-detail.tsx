@@ -23,7 +23,7 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({
   const { report, isLoading, error } = useCleaningReportDetail(reportId);
 
   // ========== デバッグエリア変数ここから ==========
-  const debugArea = (
+  {/* const debugArea = (
     <div className="fixed bottom-4 right-4 w-96 bg-gray-800 text-white p-4 rounded-lg opacity-90 shadow-lg overflow-auto max-h-96">
       <h3 className="text-lg font-bold mb-2">デバッグ情報</h3>
       <div className="space-y-2">
@@ -47,7 +47,7 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({
         </div>
       </div>
     </div>
-  );
+  ); */}
   // ========== デバッグエリア変数ここまで ==========
 
   if (isLoading) {
@@ -78,7 +78,7 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({
             </div>
           </CardContent>
         </Card>
-        {debugArea}
+        {/* {debugArea} */}
       </>
     );
   }
@@ -106,7 +106,7 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({
             </Alert>
           </CardContent>
         </Card>
-        {debugArea}
+        {/* {debugArea} */}
       </>
     );
   }
@@ -134,7 +134,7 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({
             </div>
           </CardContent>
         </Card>
-        {debugArea}
+        {/* {debugArea} */}
       </>
     );
   }
@@ -308,7 +308,7 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({
           </div>
         </CardContent>
       </Card>
-      {debugArea}
+      {/* {debugArea} */}
     </>
   );
 };
