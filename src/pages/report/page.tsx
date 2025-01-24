@@ -46,8 +46,8 @@ export const ReportPage: React.FC = () => {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">清掃報告書一覧</h1>
 
-      {/* 開発用デバッグ情報 - 後で削除 */}
-      <Card className="mb-6 bg-gray-50">
+      {/* 開発用デバッグ情報*/}
+      {/* <Card className="mb-6 bg-gray-50">
         <CardContent className="p-4">
           <h2 className="font-bold mb-2">デバッグ情報</h2>
           <div className="space-y-2 text-sm font-mono">
@@ -62,7 +62,7 @@ export const ReportPage: React.FC = () => {
             </details>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
       {/* 開発用デバッグ情報ここまで */}
 
       {selectedReportId ? (
