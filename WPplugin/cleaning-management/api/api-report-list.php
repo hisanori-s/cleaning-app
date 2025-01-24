@@ -73,7 +73,7 @@ function get_cleaning_report_data($request) {
             // 指定された物件IDに含まれる場合のみ処理
             if (in_array($house_id, $house_ids)) {
                 $house_name = get_the_title($house_id);
-                $room_number = get_field('room-number', $post_id);
+                $room_number = get_field('room-num', $post_id);
                 $room_id = get_field('room-id', $post_id);
                 
                 // 戻り値の配列に清掃報告書情報を追加
@@ -89,10 +89,10 @@ function get_cleaning_report_data($request) {
         }
     }
 
-    // 作成日順で昇順ソート
-    usort($return_report_list, function($a, $b) {
-        return strcmp($a['created_date'], $b['created_date']);
-    });
+    // // 作成日順で昇順ソート
+    // usort($return_report_list, function($a, $b) {
+    //     return strcmp($a['created_date'], $b['created_date']);
+    // });
 
     // エラーチェック
     if (empty($return_report_list)) {
