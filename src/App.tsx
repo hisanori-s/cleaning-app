@@ -1,5 +1,5 @@
 import { Suspense, useState } from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Link, useNavigate } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
 import { AuthProvider, useAuth } from './hooks/use-auth';
 import { Routes } from './routes';
@@ -35,7 +35,9 @@ const AuthenticatedLayout = () => {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <h1 className="text-xl font-semibold">シェアハウス清掃管理</h1>
+          <Link to="/" className="text-xl font-semibold hover:text-gray-600 transition-colors">
+            シェアハウス清掃管理
+          </Link>
           <UserMenu />
         </nav>
       </header>
@@ -51,6 +53,12 @@ const AuthenticatedLayout = () => {
 const UserMenu = () => {
   const { logout, user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleNavigate = (path: string) => {
+    setIsOpen(false);
+    navigate(path);
+  };
 
   return (
     <div className="relative">
@@ -64,7 +72,19 @@ const UserMenu = () => {
         </svg>
       </button>
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg">
+        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
+          <button
+            onClick={() => handleNavigate('/')}
+            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          >
+            ダッシュボード
+          </button>
+          <button
+            onClick={() => handleNavigate('/report')}
+            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          >
+            報告書一覧
+          </button>
           <button
             onClick={logout}
             className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
