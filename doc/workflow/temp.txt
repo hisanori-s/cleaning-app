@@ -1,29 +1,16 @@
 
 [参考file情報]
+ルート情報
+src/routes.tsx
 
-作成済みレポートを取得する
+メインページ（ナビメニューここにある）
+src/pages/auth/page.tsx
 
-api作成場所（ビジネスロジックなし）
-src/api/wordpress.ts
+ナビメニューのタイトルをダッシュボードへのリンクにしたい。
 
-リスト用UIコンポーネント（ビジネスロジックなし）
-src/components/report/report-list.tsx
-詳細用UIコンポーネント（ビジネスロジックなし）
-src/components/report/report-detail.tsx
-
-レポート用のhooksディレクトリ（ビジネスロジックなし）
-src/hooks/report
-
-レポート用のlibディレクトリ（ビジネスロジックOK）
-src/lib/report
-
-レポート用のページコンポーネント（ビジネスロジックなし）
-src/pages/report/page.tsx
-
-レポート用の型定義（ビジネスロジックなし）
-詳細：src/types/report-detail.ts
-リスト：src/types/report-list.ts
-
-wordpressのエンドポイントプラグイン
-WPplugin/cleaning-management/api/api-report-detail.php
+また、ユーザー情報表示に今ログアウトしか無いので、
+ダッシュボードへのリンク
+報告書一覧へのリンク
+ログアウト
+という形にしたい。
 
