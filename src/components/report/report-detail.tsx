@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { ArrowLeft, Home, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useCleaningReportDetail } from '../../hooks/report/use-cleaning-report-detail';
 import { Skeleton } from '../ui/skeleton';
 import { Alert, AlertDescription } from '../ui/alert';
@@ -9,157 +9,165 @@ import { Alert, AlertDescription } from '../ui/alert';
 type ReportDetailProps = {
   reportId: number;
   onBackClick: () => void;
-  onDashboardClick: () => void;
 };
 
-/**
- * 清掃報告書詳細を表示するコンポーネント
- */
+// Common card header component
+const ReportHeader: React.FC<{ onBackClick?: () => void; disabled?: boolean }> = ({ 
+  onBackClick, 
+  disabled = false 
+}) => (
+  <CardHeader className="flex flex-row items-center justify-between">
+    <CardTitle>清掃報告書詳細</CardTitle>
+    <div className="space-x-2">
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={onBackClick} 
+        disabled={disabled}
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        一覧に戻る
+      </Button>
+    </div>
+  </CardHeader>
+);
+
+// Image display component
+const ImageDisplay: React.FC<{
+  url?: string;
+  note?: string;
+  placeholder?: string;
+  className?: string;
+}> = ({ url, note, placeholder = '画像なし', className = 'h-48' }) => (
+  <div className="space-y-2">
+    {url ? (
+      <>
+        <img
+          src={url}
+          alt={note || placeholder}
+          className={`w-full ${className} object-cover rounded-lg`}
+        />
+        {note && <p className="text-sm text-gray-500">{note}</p>}
+      </>
+    ) : (
+      <div className={`w-full ${className} bg-gray-100 rounded-lg flex items-center justify-center`}>
+        <p className="text-gray-400">{placeholder}</p>
+      </div>
+    )}
+  </div>
+);
+
+// Section header component
+const SectionHeader: React.FC<{ title: string }> = ({ title }) => (
+  <h3 className="text-lg font-semibold mb-2">{title}</h3>
+);
+
+// Before/After comparison component
+const ComparisonImages: React.FC<{
+  comparison: {
+    before?: { url: string; note?: string };
+    after?: { url: string; note?: string };
+  };
+}> = ({ comparison }) => (
+  <div className="grid grid-cols-2 gap-4">
+    <ImageDisplay url={comparison.before?.url} note={comparison.before?.note} />
+    <div className="relative">
+      <div className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+        <div className="bg-white rounded-full p-2 shadow-md">
+          <ArrowRight className="h-6 w-6 text-blue-500" />
+        </div>
+      </div>
+      <ImageDisplay url={comparison.after?.url} note={comparison.after?.note} />
+    </div>
+  </div>
+);
+
 export const ReportDetail: React.FC<ReportDetailProps> = ({
   reportId,
-  onBackClick,
-  onDashboardClick
+  onBackClick
 }) => {
   const { report, isLoading, error } = useCleaningReportDetail(reportId);
 
-  // ========== デバッグエリア変数ここから ==========
-  {/* const debugArea = (
-    <div className="fixed bottom-4 right-4 w-96 bg-gray-800 text-white p-4 rounded-lg opacity-90 shadow-lg overflow-auto max-h-96">
-      <h3 className="text-lg font-bold mb-2">デバッグ情報</h3>
-      <div className="space-y-2">
-        <div>
-          <p className="text-sm text-gray-300">レポートID:</p>
-          <pre className="text-xs bg-gray-700 p-1 rounded">{reportId}</pre>
-        </div>
-        <div>
-          <p className="text-sm text-gray-300">ローディング状態:</p>
-          <pre className="text-xs bg-gray-700 p-1 rounded">{String(isLoading)}</pre>
-        </div>
-        <div>
-          <p className="text-sm text-gray-300">エラー:</p>
-          <pre className="text-xs bg-gray-700 p-1 rounded">{error || 'なし'}</pre>
-        </div>
-        <div>
-          <p className="text-sm text-gray-300">レスポンスデータ:</p>
-          <pre className="text-xs bg-gray-700 p-1 rounded overflow-auto max-h-40">
-            {JSON.stringify(report, null, 2)}
-          </pre>
-        </div>
-      </div>
-    </div>
-  ); */}
-  // ========== デバッグエリア変数ここまで ==========
+  // ========== デバッグエリア開始 ==========
+  // const debugArea = (
+  //   <div className="fixed bottom-4 right-4 w-96 bg-gray-800 text-white p-4 rounded-lg opacity-90 shadow-lg overflow-auto max-h-96">
+  //     <h3 className="text-lg font-bold mb-2">デバッグ情報</h3>
+  //     <div className="space-y-2">
+  //       <div>
+  //         <p className="text-sm text-gray-300">レポートID:</p>
+  //         <pre className="text-xs bg-gray-700 p-1 rounded">{reportId}</pre>
+  //       </div>
+  //       <div>
+  //         <p className="text-sm text-gray-300">ローディング状態:</p>
+  //         <pre className="text-xs bg-gray-700 p-1 rounded">{String(isLoading)}</pre>
+  //       </div>
+  //       <div>
+  //         <p className="text-sm text-gray-300">エラー:</p>
+  //         <pre className="text-xs bg-gray-700 p-1 rounded">{error || 'なし'}</pre>
+  //       </div>
+  //       <div>
+  //         <p className="text-sm text-gray-300">レスポンスデータ:</p>
+  //         <pre className="text-xs bg-gray-700 p-1 rounded overflow-auto max-h-40">
+  //           {JSON.stringify(report, null, 2)}
+  //         </pre>
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
+  // ========== デバッグエリア終了 ==========
 
   if (isLoading) {
     return (
-      <>
-        <Card className="w-full">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>清掃報告書詳細</CardTitle>
-            <div className="space-x-2">
-              <Button variant="outline" size="sm" disabled>
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                一覧に戻る
-              </Button>
-              <Button variant="outline" size="sm" disabled>
-                <Home className="mr-2 h-4 w-4" />
-                ダッシュボードに戻る
-              </Button>
+      <Card className="w-full">
+        <ReportHeader disabled />
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-1/2" />
+            <Skeleton className="h-8 w-1/3" />
+            <div className="grid grid-cols-2 gap-4">
+              <Skeleton className="h-48 w-full" />
+              <Skeleton className="h-48 w-full" />
             </div>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              <Skeleton className="h-8 w-1/2" />
-              <Skeleton className="h-8 w-1/3" />
-              <div className="grid grid-cols-2 gap-4">
-                <Skeleton className="h-48 w-full" />
-                <Skeleton className="h-48 w-full" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        {/* {debugArea} */}
-      </>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   if (error) {
     return (
-      <>
-        <Card className="w-full">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>清掃報告書詳細</CardTitle>
-            <div className="space-x-2">
-              <Button variant="outline" size="sm" onClick={onBackClick}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                一覧に戻る
-              </Button>
-              <Button variant="outline" size="sm" onClick={onDashboardClick}>
-                <Home className="mr-2 h-4 w-4" />
-                ダッシュボードに戻る
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="p-6">
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          </CardContent>
-        </Card>
-        {/* {debugArea} */}
-      </>
+      <Card className="w-full">
+        <ReportHeader onBackClick={onBackClick} />
+        <CardContent className="p-6">
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
     );
   }
 
   if (!report) {
     return (
-      <>
-        <Card className="w-full">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>清掃報告書詳細</CardTitle>
-            <div className="space-x-2">
-              <Button variant="outline" size="sm" onClick={onBackClick}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                一覧に戻る
-              </Button>
-              <Button variant="outline" size="sm" onClick={onDashboardClick}>
-                <Home className="mr-2 h-4 w-4" />
-                ダッシュボードに戻る
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="text-center p-8 text-gray-500">
-              <p>報告書が見つかりませんでした</p>
-            </div>
-          </CardContent>
-        </Card>
-        {/* {debugArea} */}
-      </>
+      <Card className="w-full">
+        <ReportHeader onBackClick={onBackClick} />
+        <CardContent className="p-6">
+          <div className="text-center p-8 text-gray-500">
+            <p>報告書が見つかりませんでした</p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
     <>
       <Card className="w-full">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>清掃報告書詳細</CardTitle>
-          <div className="space-x-2">
-            <Button variant="outline" size="sm" onClick={onBackClick}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              一覧に戻る
-            </Button>
-            <Button variant="outline" size="sm" onClick={onDashboardClick}>
-              <Home className="mr-2 h-4 w-4" />
-              ダッシュボードに戻る
-            </Button>
-          </div>
-        </CardHeader>
+        <ReportHeader onBackClick={onBackClick} />
         <CardContent className="p-6">
           <div className="space-y-6">
-            {/* 基本情報 */}
             <div>
-              <h3 className="text-lg font-semibold mb-2">基本情報</h3>
+              <SectionHeader title="基本情報" />
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-gray-500">物件名</p>
@@ -172,109 +180,52 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({
               </div>
             </div>
 
-            {/* ビフォーアフター画像 */}
             {report.comparison_images.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold mb-2">ビフォーアフター画像</h3>
+                <SectionHeader title="ビフォーアフター画像" />
                 <div className="space-y-4">
                   {report.comparison_images.map((comparison, index) => (
-                    <div key={index} className="grid grid-cols-2 gap-4">
-                      {/* ビフォー画像 */}
-                      <div className="space-y-2">
-                        {comparison.before ? (
-                          <>
-                            <img
-                              src={comparison.before.url}
-                              alt={comparison.before.note || 'ビフォー画像'}
-                              className="w-full h-48 object-cover rounded-lg"
-                            />
-                            {comparison.before.note && (
-                              <p className="text-sm text-gray-500">{comparison.before.note}</p>
-                            )}
-                          </>
-                        ) : (
-                          <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">
-                            <p className="text-gray-400">画像なし</p>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* アフター画像 */}
-                      <div className="space-y-2 relative">
-                        <div className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-                          <div className="bg-white rounded-full p-2 shadow-md">
-                            <ArrowRight className="h-6 w-6 text-blue-500" />
-                          </div>
-                        </div>
-                        {comparison.after ? (
-                          <>
-                            <img
-                              src={comparison.after.url}
-                              alt={comparison.after.note || 'アフター画像'}
-                              className="w-full h-48 object-cover rounded-lg"
-                            />
-                            {comparison.after.note && (
-                              <p className="text-sm text-gray-500">{comparison.after.note}</p>
-                            )}
-                          </>
-                        ) : (
-                          <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">
-                            <p className="text-gray-400">画像なし</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    <ComparisonImages key={index} comparison={comparison} />
                   ))}
                 </div>
               </div>
             )}
 
-            {/* 特別清掃・修繕提案画像 */}
             {report.proposal_images.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold mb-2">特別清掃・修繕提案</h3>
+                <SectionHeader title="特別清掃・修繕提案" />
                 <div className="grid grid-cols-3 gap-4">
                   {report.proposal_images.map((image, index) => (
-                    <div key={index} className="space-y-2">
-                      <img
-                        src={image.url}
-                        alt={image.note || '提案画像'}
-                        className="w-full h-32 object-cover rounded-lg"
-                      />
-                      {image.note && (
-                        <p className="text-sm text-gray-500">{image.note}</p>
-                      )}
-                    </div>
+                    <ImageDisplay
+                      key={index}
+                      url={image.url}
+                      note={image.note}
+                      className="h-32"
+                    />
                   ))}
                 </div>
               </div>
             )}
 
-            {/* 残置物/汚損・破損個所画像 */}
             {report.damage_images.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold mb-2">残置物/汚損・破損個所</h3>
+                <SectionHeader title="残置物/汚損・破損個所" />
                 <div className="grid grid-cols-3 gap-4">
                   {report.damage_images.map((image, index) => (
-                    <div key={index} className="space-y-2">
-                      <img
-                        src={image.url}
-                        alt={image.note || '破損画像'}
-                        className="w-full h-32 object-cover rounded-lg"
-                      />
-                      {image.note && (
-                        <p className="text-sm text-gray-500">{image.note}</p>
-                      )}
-                    </div>
+                    <ImageDisplay
+                      key={index}
+                      url={image.url}
+                      note={image.note}
+                      className="h-32"
+                    />
                   ))}
                 </div>
               </div>
             )}
 
-            {/* 添付ファイル */}
             {report.attached_files.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold mb-2">添付ファイル</h3>
+                <SectionHeader title="添付ファイル" />
                 <div className="space-y-2">
                   {report.attached_files.map((file, index) => (
                     <div key={index} className="flex items-center space-x-2">
@@ -292,15 +243,14 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({
               </div>
             )}
 
-            {/* 部屋の状態と全体メモ */}
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-semibold mb-2">部屋の状態</h3>
+                <SectionHeader title="部屋の状態" />
                 <p>{report.room_status}</p>
               </div>
               {report.overall_note && (
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">全体メモ</h3>
+                  <SectionHeader title="全体メモ" />
                   <p className="whitespace-pre-wrap">{report.overall_note}</p>
                 </div>
               )}
@@ -312,3 +262,5 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({
     </>
   );
 };
+
+export default ReportDetail;
