@@ -36,6 +36,18 @@ const LoadingSkeleton = () => (
   </Card>
 );
 
+// 清掃担当者メモコンポーネント
+const CleanerNoteCard = ({ note }: { note: string }) => (
+  <Card>
+    <CardHeader>
+      <CardTitle>伝達事項（物件単位）</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <p className="whitespace-pre-wrap">{note}</p>
+    </CardContent>
+  </Card>
+);
+
 export function PropertyInfoBox({ room, isLoading, error }: RoomInfoBoxProps) {
   if (error) {
     return <ErrorDisplay error={error} />;
@@ -57,32 +69,35 @@ export function PropertyInfoBox({ room, isLoading, error }: RoomInfoBoxProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>物件情報</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="font-semibold">物件名:</p>
-            <p>{room.house_name}</p>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>物件情報</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="font-semibold">物件名:</p>
+              <p>{room.house_name}</p>
+            </div>
+            <div>
+              <p className="font-semibold">物件ID:</p>
+              <p>{room.house_id}</p>
+            </div>
+            <div>
+              <p className="font-semibold">住所:</p>
+              <p>{room.address}</p>
+            </div>
+            <div>
+              <p className="font-semibold">鍵情報:</p>
+              <p>部屋: {room.room_key}</p>
+              <p>玄関: {room.building_key}</p>
+            </div>
           </div>
-          <div>
-            <p className="font-semibold">物件ID:</p>
-            <p>{room.house_id}</p>
-          </div>
-          <div>
-            <p className="font-semibold">住所:</p>
-            <p>{room.address}</p>
-          </div>
-          <div>
-            <p className="font-semibold">鍵情報:</p>
-            <p>部屋: {room.room_key}</p>
-            <p>玄関: {room.building_key}</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      {room.cleaner_note && <CleanerNoteCard note={room.cleaner_note} />}
+    </>
   );
 }
 
@@ -150,14 +165,8 @@ export function RoomInfoBox({ room, isLoading, error }: RoomInfoBoxProps) {
               )}
             </div>
           </div>
-          {room.cleaner_note && (
-            <div className="col-span-2">
-              <p className="font-semibold">清掃担当者メモ:</p>
-              <p className="whitespace-pre-wrap">{room.cleaner_note}</p>
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>
   );
-} 
+}
