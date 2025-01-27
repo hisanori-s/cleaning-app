@@ -87,11 +87,11 @@ function validate_report_query_params()
 function report_entry_shortcode()
 {
 
-    if (validate_report_done_query_params()) {
+    if ( validate_report_done_query_params()) {
         return '<div class="report-done">投稿が完了しました。このページを閉じてください。<br>内容の確認は報告書一覧からお願いします。</div>';
     }
 
-    if (!validate_report_query_params()) {
+    if ( !validate_report_query_params()) {
         return '<div class="report-error">アクセス権限がありません。必要なパラメータが不足しています。</div>';
     }
     ob_start();

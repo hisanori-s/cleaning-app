@@ -41,7 +41,7 @@ function register_cleaning_report_rest_route() {
  * 
  * @returns {CleaningReportItem[]}
  */
-function get_cleaning_report_data($request) {
+function get_cleaning_report_data( WP_REST_Request $request) {
     // リクエストから物件IDの配列を取得
     $house_ids = $request->get_param('house_ids');
     
