@@ -27,8 +27,15 @@ defined('ABSPATH') or die('Direct access not allowed.');
 
 // APIキーをチェックする関数
 function verify_api_key($request) {
+    // env.phpからAPIキーを取得
+    $env_config = include(plugin_dir_path(__FILE__) . 'env.php');
+    $api_secret = $env_config['api_secret'];
+    
+    // リクエストヘッダーからAPIキーを取得
     $api_key = $request->get_header('X-API-Key');
-    return $api_key === 'test123';
+    
+    // APIキーが一致するかチェック
+    return $api_key === $api_secret;
 }
 
 // -----------------------------------------

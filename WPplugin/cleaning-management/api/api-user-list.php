@@ -8,8 +8,7 @@ function register_users_rest_route() {
         array(
             'methods' => 'GET',
             'callback' => 'get_users_data',
-            // 'permission_callback' => 'check_api_permission'  // メインファイルの関数を使用
-            'permission_callback' => '__return_true' // 認証なしで全て許可
+            'permission_callback' => 'verify_api_key'
         )
     );
 }

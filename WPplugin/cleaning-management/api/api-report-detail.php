@@ -16,7 +16,7 @@ function register_cleaning_report_detail_route() {
                     'description' => '清掃報告書の投稿ID'
                 )
             ),
-            'permission_callback' => '__return_true'
+            'permission_callback' => 'verify_api_key'
         )
     );
 }

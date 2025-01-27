@@ -21,8 +21,7 @@ function register_room_list_rest_route() {
                     'description' => '物件IDの配列'
                 )
             ),
-            // 'permission_callback' => 'check_api_permission'  // メインファイルの関数を使用
-            'permission_callback' => '__return_true' // 認証なしで全て許可
+            'permission_callback' => 'verify_api_key'
         )
     );
 }

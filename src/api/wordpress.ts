@@ -309,7 +309,7 @@ class WordPressApiClient {
 
   private getHeaders(isFormData = false): HeadersInit {
     const headers: HeadersInit = {
-      'X-API-Key': API_KEY || 'test123'
+      'X-API-Key': API_KEY
     };
     
     // Content-Typeヘッダーの設定

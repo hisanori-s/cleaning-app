@@ -24,8 +24,7 @@ function register_room_detail_rest_route()
                     'description' => '部屋番号'
                 )
             ),
-            // 'permission_callback' => 'check_api_permission'  // メインファイルの関数を使用
-            'permission_callback' => '__return_true'
+            'permission_callback' => 'verify_api_key'
         )
     );
 }
