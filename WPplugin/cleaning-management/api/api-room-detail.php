@@ -50,7 +50,7 @@ function register_room_detail_rest_route()
  * 
  * @returns {RoomDetailItem}
  */
-function get_room_detail_data($request)
+function get_room_detail_data(WP_REST_Request $request)
 {
     $house_id = $request->get_param('house_id');
     $target_room_number = $request->get_param('room_number');

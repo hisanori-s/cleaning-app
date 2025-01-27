@@ -45,7 +45,7 @@ function register_cleaning_report_detail_route() {
  * 
  * @returns {CleaningReportDetail}
  */
-function get_cleaning_report_detail($request) {
+function get_cleaning_report_detail(WP_REST_Request $request) {
     $report_id = $request->get_param('report_id');
     
     // 投稿の存在確認
