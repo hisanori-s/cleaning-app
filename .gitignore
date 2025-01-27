@@ -25,3 +25,4 @@ dist-ssr
 
 #いつもの
 .workbench
+env.php
