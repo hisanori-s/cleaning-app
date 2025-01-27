@@ -151,7 +151,7 @@ function get_cleaning_report_detail($request) {
         'proposal_images' => create_image_array($check_contents['img-other-block']),
         'damage_images' => create_image_array($check_contents['img-other-block2']),
         'attached_files' => create_file_array($check_contents['files-block']),
-        'room_status' => $check_contents['status']['value'] ?? '',
+        'room_status' => $check_contents['status']['label'] ?? '',
         'overall_note' => $check_contents['note'] ?? ''
     );
 

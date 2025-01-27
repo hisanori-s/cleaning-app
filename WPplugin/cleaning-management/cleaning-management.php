@@ -83,3 +83,16 @@ if (is_dir($api_dir)) {
         }
     }
 }
+// -----------------------------------------
+
+// ショートコードファイルの読み込み
+// 同階層のshortcodeディレクトリの中身を自動取得
+$shortcode_dir = plugin_dir_path(__FILE__) . 'shortcode/';
+if (is_dir($shortcode_dir)) {
+    $files = scandir($shortcode_dir);
+    foreach ($files as $file) {
+        if (strpos($file, 'code-') === 0 && strpos($file, '.php') !== false) {
+            require_once $shortcode_dir . $file;
+        }
+    }
+}

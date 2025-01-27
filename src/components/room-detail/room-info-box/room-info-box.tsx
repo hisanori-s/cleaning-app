@@ -1,6 +1,9 @@
 import { Card, CardHeader, CardTitle, CardContent } from '../../ui/card';
+import { Button } from '../../ui/button';
+import { useNavigate } from 'react-router-dom';
 import type { RoomDetail } from '../../../types/room-detail';
 import { Skeleton } from '../../ui/skeleton';
+import { useAuth } from '../../../hooks/use-auth';
 
 interface RoomInfoBoxProps {
   room: RoomDetail;
@@ -47,6 +50,46 @@ const CleanerNoteCard = ({ note }: { note: string }) => (
     </CardContent>
   </Card>
 );
+
+// アクションボタンコンポーネント
+const ActionButtons = ({ room }: { room: RoomDetail }) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const generateReportUrl = () => {
+    const baseUrl = import.meta.env.VITE_WP_REPORT_ENTRY_URL;
+    
+    const params = new URLSearchParams({
+      user_id: user?.user_id?.toString() || '0',
+      house_id: room?.house_id?.toString() || '0',
+      room_id: room?.room_id?.toString() || '0',
+      room_number: room?.room_number || '',
+      customer_id: room?.customer_id?.toString() || '0'
+    });
+
+    return `${baseUrl}?${params.toString()}`;
+  };
+
+  return (
+    <div className="flex justify-end space-x-4 mt-6">
+      <Button
+        variant="outline"
+        onClick={() => navigate('/')}
+      >
+        部屋一覧に戻る
+      </Button>
+      <Button asChild>
+        <a
+          href={generateReportUrl()}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          清掃報告を作成
+        </a>
+      </Button>
+    </div>
+  );
+};
 
 export function PropertyInfoBox({ room, isLoading, error }: RoomInfoBoxProps) {
   if (error) {
@@ -122,51 +165,58 @@ export function RoomInfoBox({ room, isLoading, error }: RoomInfoBoxProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>部屋情報</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="font-semibold">部屋番号:</p>
-            <p>{room.room_number}</p>
-          </div>
-          <div>
-            <p className="font-semibold">退去日:</p>
-            <p>{room.moveout_date}</p>
-          </div>
-          <div>
-            <p className="font-semibold">空室予定日:</p>
-            <p>{room.vacancy_date}</p>
-          </div>
-          <div>
-            <p className="font-semibold">ステータス:</p>
-            <div className="flex gap-2">
-              <span
-                className={LABEL_BASE_STYLE}
-                style={{
-                  color: room.status_label.color,
-                  backgroundColor: `${room.status_label.color}33`
-                }}
-              >
-                {room.status_label.text}
-              </span>
-              {room.early_leave && (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>部屋情報</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="font-semibold">部屋番号:</p>
+              <p>{room.room_number}</p>
+            </div>
+            <div>
+              <p className="font-semibold">退去日:</p>
+              <p>{room.moveout_date}</p>
+            </div>
+            <div>
+              <p className="font-semibold">顧客ID:</p>
+              <p>{room.customer_id}</p>
+            </div>
+            <div>
+              <p className="font-semibold">空室予定日:</p>
+              <p>{room.vacancy_date}</p>
+            </div>
+            <div>
+              <p className="font-semibold">ステータス:</p>
+              <div className="flex gap-2">
                 <span
                   className={LABEL_BASE_STYLE}
                   style={{
-                    color: '#9C27B0',
-                    backgroundColor: '#9C27B033'
+                    color: room.status_label.color,
+                    backgroundColor: `${room.status_label.color}33`
                   }}
                 >
-                  早期退去済み
+                  {room.status_label.text}
                 </span>
-              )}
+                {room.early_leave && (
+                  <span
+                    className={LABEL_BASE_STYLE}
+                    style={{
+                      color: '#9C27B0',
+                      backgroundColor: '#9C27B033'
+                    }}
+                  >
+                    早期退去済み
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      <ActionButtons room={room} />
+    </>
   );
 }

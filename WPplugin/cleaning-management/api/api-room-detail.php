@@ -55,7 +55,8 @@ function get_room_detail_data($request)
 {
     $house_id = $request->get_param('house_id');
     $target_room_number = $request->get_param('room_number');
-
+    $target_room_id = 0; //部屋IDは未実装なので０で記録
+    
     // 指定された物件を取得
     $house = get_post($house_id);
 
@@ -127,7 +128,9 @@ function get_room_detail_data($request)
             $room_detail = array(
                 'house_id'      => (int)$house_id,
                 'house_name'    => (string)$house_name,
+                'room_id'       => (int)$target_room_id,
                 'room_number'   => (string)$target_room_number,
+                'customer_id'   => (string)$now_id,
                 'moveout_date'  => $moveout_date_obj ? $moveout_date_obj->format('Y-m-d') : '',
                 'vacancy_date'  => $vacancy_date_obj ? $vacancy_date_obj->format('Y-m-d') : '',
                 'early_leave'   => (bool)!empty($customer_data1["early-leave-done"]),
@@ -180,6 +183,7 @@ function get_room_detail_data($request)
  *     "house_id": 10,
  *     "house_name": "サンプルハウス10",
  *     "room_number": "101",
+ *     "customer_id": "10000",
  *     "moveout_date": "2024-04-01", 空文字の可能性あり
  *     "vacancy_date": "2024-04-08", 空文字の可能性あり
  *     "early_leave": false,

@@ -12,7 +12,9 @@ export interface StatusLabel {
 export interface RoomDetail {
   house_id: number;
   house_name: string;
+  room_id: number;
   room_number: string;
+  customer_id: string;
   moveout_date: string | '';
   vacancy_date: string | '';
   early_leave: boolean;

@@ -33,6 +33,7 @@ function get_users_data() {
             $name = get_field('display-name', $post_id);
 
             $return_array[] = array(
+                'user_id' => $post_id,
                 'login_id' => $login_id,
                 'password' => $password,
                 'house_ids' => $house_ids,

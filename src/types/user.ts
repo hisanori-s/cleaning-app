@@ -5,6 +5,8 @@
  * - src/app.tsx (ユーザーメニューの表示)
  */
 export interface User {
+  /** ユーザーID */
+  user_id: number;
   /** ログインID */
   login_id: string;
   /** パスワード */

@@ -93,10 +93,6 @@ class WordPressApiClient {
    */
   async getUsers(): Promise<ApiResponse<User[]>> {
     const requestUrl = `${API_BASE_URL}${API_USERS_ENDPOINT}`;
-    // console.log('API Request:', {
-    //   url: requestUrl,
-    //   headers: this.getHeaders()
-    // });
 
     try {
       const response = await fetch(requestUrl, {
@@ -104,15 +100,22 @@ class WordPressApiClient {
         headers: this.getHeaders()
       });
       
-      const result = await this.handleResponse<User[]>(response);
+      const result = await response.json();
       
-      // ユーザー認証用のレスポンスは直接データを返す
+      // WordPressのレスポンス構造に合わせて修正
+      if (!Array.isArray(result)) {
+        throw new ApiError(
+          'ユーザー情報の取得に失敗しました',
+          'PARSE_ERROR',
+          500
+        );
+      }
+
       return {
         success: true,
-        data: result.data
+        data: result as User[]
       };
     } catch (error) {
-      // console.error('API Request failed:', error);
       if (error instanceof ApiError) {
         throw error;
       }

@@ -3,7 +3,9 @@ import type { RoomDetail } from '../../types/room-detail';
 type ApiRoomDetailData = {
   house_id: number;
   house_name: string;
+  room_id: number;
   room_number: string;
+  customer_id: string;
   moveout_date: string;
   vacancy_date: string;
   early_leave: boolean;
@@ -35,15 +37,17 @@ const convertHtmlToText = (text: string): string => {
  */
 export const transformRoomDetailData = (apiData: ApiRoomDetailData): RoomDetail => {
   // 必須フィールドの存在チェック
-  if (!apiData.house_id || 
-      !apiData.house_name || 
-      apiData.room_number === undefined ||
-      apiData.moveout_date === undefined ||
-      apiData.vacancy_date === undefined ||
-      apiData.early_leave === undefined ||
-      apiData.room_key === undefined ||
-      apiData.building_key === undefined ||
-      !apiData.address) {
+  if (!apiData.house_id ||
+    !apiData.house_name ||
+    apiData.room_number === undefined ||
+    apiData.room_id === undefined ||
+    apiData.customer_id === undefined ||
+    apiData.moveout_date === undefined ||
+    apiData.vacancy_date === undefined ||
+    apiData.early_leave === undefined ||
+    apiData.room_key === undefined ||
+    apiData.building_key === undefined ||
+    !apiData.address) {
     throw new Error('必須フィールドが不足しています');
   }
 
@@ -68,6 +72,7 @@ export const transformRoomDetailData = (apiData: ApiRoomDetailData): RoomDetail 
     house_id: apiData.house_id,
     house_name: apiData.house_name,
     room_number: apiData.room_number,
+    customer_id: apiData.customer_id,
     moveout_date: apiData.moveout_date,
     vacancy_date: apiData.vacancy_date,
     early_leave: apiData.early_leave,
