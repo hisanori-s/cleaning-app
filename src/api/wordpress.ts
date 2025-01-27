@@ -1,7 +1,7 @@
 import { User, RoomDetail, CleaningReport, ApiResponse } from '../types/index';
 import type { RoomList } from '../types/room-list';
-import type { CleaningReportItem, CleaningReportListResponse } from '../types/report-list';
-import type { CleaningReportDetailResponse, CleaningReportDetail } from '../types/report-detail';
+import type { CleaningReportItem } from '../types/report-list';
+import type { CleaningReportDetail } from '../types/report-detail';
 // エンドポイントの型
 // fetch('https://your-site.com/wp-json/cleaning-management/v1/users', {
 //   headers: {
@@ -259,8 +259,8 @@ class WordPressApiClient {
   }
 
   /**
-   * 清掃報告書の詳細を取得する
-   * @param reportId 清掃報告書のID
+   * 清掃報告書詳細を取得する
+   * @param reportId 報告書ID
    * @returns Promise<ApiResponse<CleaningReportDetail>>
    */
   async getCleaningReportDetail(reportId: number): Promise<ApiResponse<CleaningReportDetail>> {
