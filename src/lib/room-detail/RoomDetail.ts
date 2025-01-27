@@ -71,6 +71,7 @@ export const transformRoomDetailData = (apiData: ApiRoomDetailData): RoomDetail 
   return {
     house_id: apiData.house_id,
     house_name: apiData.house_name,
+    room_id: apiData.room_id,
     room_number: apiData.room_number,
     customer_id: apiData.customer_id,
     moveout_date: apiData.moveout_date,
