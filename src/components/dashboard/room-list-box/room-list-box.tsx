@@ -8,10 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Home } from 'lucide-react';
 import type { RoomList } from '@/types/room-list';
 import { useMemo } from 'react';
-
-
 
 // 共通のラベルスタイル
 const LABEL_BASE_STYLE = 'px-2 py-1 rounded-full text-sm';
@@ -141,9 +141,6 @@ export function RoomListBox({
             key={`${room.house_id}-${room.room_number}-${index}`}
             className="cursor-pointer hover:bg-gray-50"
             onClick={() => {
-              // リンク機能の作成部分
-              // 部屋の詳細情報へ移動
-              // セッションストレージに選択された部屋の情報を保存（物件ID＆部屋番号）
               const selectedRoom = {
                 house_id: room.house_id,
                 room_number: room.room_number,
@@ -186,48 +183,73 @@ export function RoomListBox({
   );
 
   try {
-    // エラーコールバックが呼ばれた場合はエラー表示
     if (onError && rooms.length === 0) {
       throw new Error('ネットワークエラーが発生しました');
     }
 
-    // 有効なデータがない場合は何も表示しない
     if (validRooms.length === 0) {
       return null;
     }
 
     if (groupByStatus && statusGroups) {
       return (
-        <div className="space-y-6">
-          {statusGroups.map(group => (
-            <Card key={group.label}>
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="all" className="flex items-center gap-2">
+              <Home className="w-4 h-4" />
+              全部屋一覧
+            </TabsTrigger>
+            {statusGroups.map(group => (
+              <TabsTrigger
+                key={group.label}
+                value={group.label}
+                className="flex items-center gap-2"
+                style={{ color: group.color }}
+              >
+                {group.label}
+                <span className="ml-1 text-sm">({group.rooms.length})</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          <TabsContent value="all">
+            <Card>
               <CardHeader>
-                <CardTitle 
-                  className="flex items-center gap-2"
-                  style={{ color: group.color }}
-                >
-                  {`${group.label}`}
-                  <span className="text-sm font-normal text-gray-500">
-                    ({group.rooms.length}件)
-                  </span>
-                </CardTitle>
+                <CardTitle className={titleColor}>全部屋一覧</CardTitle>
               </CardHeader>
-              {renderRoomTable(group.rooms)}
+              {renderRoomTable(validRooms)}
             </Card>
+          </TabsContent>
+
+          {statusGroups.map(group => (
+            <TabsContent key={group.label} value={group.label}>
+              <Card>
+                <CardHeader>
+                  <CardTitle 
+                    className="flex items-center gap-2"
+                    style={{ color: group.color }}
+                  >
+                    {group.label}
+                    <span className="text-sm font-normal text-gray-500">
+                      ({group.rooms.length}件)
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                {renderRoomTable(group.rooms)}
+              </Card>
+            </TabsContent>
           ))}
-        </div>
+        </Tabs>
       );
     }
 
     return (
-      <>
-        <Card>
-          <CardHeader>
-            <CardTitle className={titleColor}>{title}</CardTitle>
-          </CardHeader>
-          {renderRoomTable(validRooms)}
-        </Card>
-      </>
+      <Card>
+        <CardHeader>
+          <CardTitle className={titleColor}>{title}</CardTitle>
+        </CardHeader>
+        {renderRoomTable(validRooms)}
+      </Card>
     );
   } catch (error) {
     if (error instanceof Error && onError) {

@@ -88,17 +88,9 @@ export default function DashboardPage() {
       
       {/* ステータスごとの部屋一覧 */}
       <RoomListBox
-        title="【本番：このタイトルは表示されない】ステータス別部屋一覧"
+        title="【このタイトルは表示されない】ステータス別部屋一覧"
         rooms={apiRooms}
         groupByStatus={true}
-        onError={(error) => setError(error)}
-        isLoading={isLoading}
-      />
-
-      {/* 全部屋一覧 */}
-      <RoomListBox
-        title="【本番】全部屋一覧"
-        rooms={apiRooms}
         onError={(error) => setError(error)}
         isLoading={isLoading}
       />
