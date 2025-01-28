@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, X } from 'lucide-react';
 import { useCleaningReportDetail } from '../../hooks/report/use-cleaning-report-detail';
 import { Skeleton } from '../ui/skeleton';
 import { Alert, AlertDescription } from '../ui/alert';
+
+type ImageInfo = {
+  url: string;
+  note?: string;
+};
 
 type ReportDetailProps = {
   reportId: number;
@@ -32,30 +37,90 @@ const ReportHeader: React.FC<{ onBackClick?: () => void; disabled?: boolean }> =
   </CardHeader>
 );
 
+// 画像モーダルコンポーネント
+const ImageModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  imageUrl: string;
+  note?: string;
+}> = ({ isOpen, onClose, imageUrl, note }) => {
+  if (!isOpen) return null;
+
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    // クリックされた要素がオーバーレイ自体の場合のみ閉じる
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  return (
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      onClick={handleOverlayClick}
+    >
+      <div className="relative max-w-[90vw] max-h-[90vh]">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute -top-2 -right-2 bg-white hover:bg-gray-100 rounded-full"
+          onClick={onClose}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+        <img
+          src={imageUrl}
+          alt={note || '画像'}
+          className="rounded-lg max-w-full max-h-[90vh] object-contain"
+        />
+        {note && (
+          <p className="mt-2 text-sm text-white text-center bg-black bg-opacity-50 p-2 rounded">
+            {note}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // Image display component
 const ImageDisplay: React.FC<{
   url?: string;
   note?: string;
   placeholder?: string;
   className?: string;
-}> = ({ url, note, placeholder = '画像なし', className = 'h-48' }) => (
-  <div className="space-y-2">
-    {url ? (
-      <>
-        <img
-          src={url}
-          alt={note || placeholder}
-          className={`w-full ${className} object-cover rounded-lg`}
-        />
-        {note && <p className="text-sm text-gray-500">{note}</p>}
-      </>
-    ) : (
-      <div className={`w-full ${className} bg-gray-100 rounded-lg flex items-center justify-center`}>
-        <p className="text-gray-400">{placeholder}</p>
-      </div>
-    )}
-  </div>
-);
+}> = ({ url, note, placeholder = '画像なし', className = 'h-48' }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  return (
+    <div className="space-y-2">
+      {url ? (
+        <>
+          <div
+            onClick={() => setIsModalOpen(true)}
+            className="cursor-pointer transition-transform hover:scale-[1.02]"
+          >
+            <img
+              src={url}
+              alt={note || placeholder}
+              className={`w-full ${className} object-cover rounded-lg`}
+            />
+            {note && <p className="text-sm text-gray-500">{note}</p>}
+          </div>
+          <ImageModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            imageUrl={url}
+            note={note}
+          />
+        </>
+      ) : (
+        <div className={`w-full ${className} bg-gray-100 rounded-lg flex items-center justify-center`}>
+          <p className="text-gray-400">{placeholder}</p>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Section header component
 const SectionHeader: React.FC<{ title: string }> = ({ title }) => (
@@ -65,19 +130,25 @@ const SectionHeader: React.FC<{ title: string }> = ({ title }) => (
 // Before/After comparison component
 const ComparisonImages: React.FC<{
   comparison: {
-    before?: { url: string; note?: string };
-    after?: { url: string; note?: string };
+    before: ImageInfo | null;
+    after: ImageInfo | null;
   };
 }> = ({ comparison }) => (
   <div className="grid grid-cols-2 gap-4">
-    <ImageDisplay url={comparison.before?.url} note={comparison.before?.note} />
+    <ImageDisplay 
+      url={comparison.before?.url} 
+      note={comparison.before?.note} 
+    />
     <div className="relative">
       <div className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
         <div className="bg-white rounded-full p-2 shadow-md">
           <ArrowRight className="h-6 w-6 text-blue-500" />
         </div>
       </div>
-      <ImageDisplay url={comparison.after?.url} note={comparison.after?.note} />
+      <ImageDisplay 
+        url={comparison.after?.url} 
+        note={comparison.after?.note} 
+      />
     </div>
   </div>
 );
