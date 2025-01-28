@@ -81,6 +81,13 @@ function get_room_detail_data(WP_REST_Request $request)
                 // 対象の部屋以外はスキップ
                 continue;
             }
+            // 非公開メモにターゲットワードが含まれる場合はスキップ
+            $hide_memo = $room["memo"];
+            $target_word = "【清掃依頼対象外】";
+            if (strpos($hide_memo, $target_word) !== false) {
+                continue;
+            }
+            
             $now_id = $room["customer-id"];
             $room_key = $room["room-key"] ? $room["room-key"] : 'なし';
 

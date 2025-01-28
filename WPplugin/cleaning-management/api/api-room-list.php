@@ -68,6 +68,14 @@ function get_room_list_data( WP_REST_Request $request) {
 
             if ($rooms_loop) {
                 foreach ($rooms_loop as $room) {
+                    
+                    // 非公開メモにターゲットワードが含まれる場合はスキップ
+                    $hide_memo = $room["memo"];
+                    $target_word = "【清掃依頼対象外】";
+                    if (strpos($hide_memo, $target_word) !== false) {
+                        continue;
+                    }
+
                     $room_number = $room["number"];
                     $now_id = $room["customer-id"];
                     
