@@ -2,7 +2,7 @@ import { Card, CardContent } from '../../ui/card';
 
 export interface MessageBoxProps {
   title: string;
-  message: string;
+  message: React.ReactNode;
 }
 
 export function MessageBox({ title, message }: MessageBoxProps) {
