@@ -127,19 +127,19 @@ export function RoomListBox({
   const renderRoomTable = (roomsToRender: RoomList[]) => (
     <Table>
       <TableHeader>
-        <TableRow>
-          <TableHead>退去日</TableHead>
-          <TableHead>空室予定日</TableHead>
-          <TableHead>物件名</TableHead>
-          <TableHead>部屋番号</TableHead>
-          <TableHead>ステータス</TableHead>
+        <TableRow className="bg-gray-100/80">
+          <TableHead className="py-4 pl-6 text-gray-700 font-medium">退去日</TableHead>
+          <TableHead className="py-4 pl-6 text-gray-700 font-medium">空室予定日</TableHead>
+          <TableHead className="py-4 pl-6 text-gray-700 font-medium">物件名</TableHead>
+          <TableHead className="py-4 pl-6 text-gray-700 font-medium">部屋番号</TableHead>
+          <TableHead className="py-4 pl-6 text-gray-700 font-medium">ステータス</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {roomsToRender.map((room, index) => (
           <TableRow
             key={`${room.house_id}-${room.room_number}-${index}`}
-            className="cursor-pointer hover:bg-gray-50"
+            className="cursor-pointer hover:bg-gray-50 transition-colors"
             onClick={() => {
               const selectedRoom = {
                 house_id: room.house_id,
@@ -150,13 +150,13 @@ export function RoomListBox({
               navigate('/rooms');
             }}
           >
-            <TableCell>{room.moveout_date}</TableCell>
-            <TableCell>{room.vacancy_date}</TableCell>
-            <TableCell>{room.house_name}</TableCell>
-            <TableCell>{room.room_number || ''}</TableCell>
-            <TableCell className="space-x-2">
+            <TableCell className="py-4 pl-6">{room.moveout_date}</TableCell>
+            <TableCell className="py-4 pl-6">{room.vacancy_date}</TableCell>
+            <TableCell className="py-4 pl-6">{room.house_name}</TableCell>
+            <TableCell className="py-4 pl-6">{room.room_number || ''}</TableCell>
+            <TableCell className="py-4 pl-6 space-x-2">
               <span
-                className={LABEL_BASE_STYLE}
+                className={`${LABEL_BASE_STYLE} inline-flex items-center justify-center`}
                 style={{
                   color: room['status_label'].color,
                   backgroundColor: `${room['status_label'].color}33`
@@ -166,7 +166,7 @@ export function RoomListBox({
               </span>
               {room.early_leave && (
                 <span
-                  className={LABEL_BASE_STYLE}
+                  className={`${LABEL_BASE_STYLE} inline-flex items-center justify-center`}
                   style={{
                     color: EARLY_LEAVE_LABEL_STYLES.color,
                     backgroundColor: EARLY_LEAVE_LABEL_STYLES.backgroundColor
@@ -193,9 +193,9 @@ export function RoomListBox({
 
     if (groupByStatus && statusGroups) {
       return (
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="all" className="flex items-center gap-2">
+        <Tabs defaultValue="all" className="w-full space-y-6">
+          <TabsList className="mb-6 bg-gray-100 p-1 rounded-lg">
+            <TabsTrigger value="all" className="flex items-center gap-2 px-4 py-2 rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
               <Home className="w-4 h-4" />
               全部屋一覧
             </TabsTrigger>
@@ -203,30 +203,30 @@ export function RoomListBox({
               <TabsTrigger
                 key={group.label}
                 value={group.label}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 px-4 py-2 rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
                 style={{ color: group.color }}
               >
                 {group.label}
-                <span className="ml-1 text-sm">({group.rooms.length})</span>
+                <span className="ml-1 text-sm font-medium">({group.rooms.length})</span>
               </TabsTrigger>
             ))}
           </TabsList>
 
           <TabsContent value="all">
-            <Card>
-              <CardHeader>
-                <CardTitle className={titleColor}>全部屋一覧</CardTitle>
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="px-8 py-5 border-b">
+                <CardTitle className={`${titleColor} text-xl`}>全部屋一覧</CardTitle>
               </CardHeader>
-              {renderRoomTable(validRooms)}
+                {renderRoomTable(validRooms)}
             </Card>
           </TabsContent>
 
           {statusGroups.map(group => (
             <TabsContent key={group.label} value={group.label}>
-              <Card>
-                <CardHeader>
+              <Card className="border-0 shadow-sm">
+                <CardHeader className="px-8 py-5 border-b">
                   <CardTitle 
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 text-xl"
                     style={{ color: group.color }}
                   >
                     {group.label}
@@ -235,7 +235,7 @@ export function RoomListBox({
                     </span>
                   </CardTitle>
                 </CardHeader>
-                {renderRoomTable(group.rooms)}
+                  {renderRoomTable(group.rooms)}
               </Card>
             </TabsContent>
           ))}

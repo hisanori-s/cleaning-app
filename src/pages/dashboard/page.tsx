@@ -69,12 +69,12 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">ダッシュボード</h1>
+    <div className="container mx-auto px-6 py-8 space-y-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">ダッシュボード</h1>
         <Button
           onClick={handleReportListClick}
-          className="flex items-center"
+          className="flex items-center shadow-sm"
         >
           <ClipboardList className="mr-2 h-4 w-4" />
           作成済み報告書一覧
