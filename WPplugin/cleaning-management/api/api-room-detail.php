@@ -105,7 +105,7 @@ function get_room_detail_data(WP_REST_Request $request)
                             'color' => '#888888',
                             'text' => '退去予定'
                         );
-                    } elseif ($now > $moveout_date_obj && $now <= $vacancy_date_obj) {
+                    } elseif ($now > $moveout_date_obj && $now < $vacancy_date_obj) {
                         $status_label = array(
                             'color' => '#44BB44',
                             'text' => '入室可能'

@@ -96,7 +96,7 @@ function get_room_list_data( WP_REST_Request $request) {
                                         'color' => '#888888',
                                         'text' => '退去予定'
                                     );
-                                } elseif ($now > $moveout_date_obj && $now <= $vacancy_date_obj) {
+                                } elseif ($now > $moveout_date_obj && $now < $vacancy_date_obj) {
                                     // 入室可能（緑系）
                                     // 今日が退去予定日の翌日～空室予定日の前日の間は、入室可能のラベルを返す。
                                     $status_label = array(
@@ -105,7 +105,7 @@ function get_room_list_data( WP_REST_Request $request) {
                                     );
                                 } else {
                                     // 期限超過（赤系）
-                                    // 空室予定日の翌日以降は、期限超過のラベルを返す。
+                                    // 空室予定日以降は、期限超過のラベルを返す。
                                     $status_label = array(
                                         'color' => '#FF4444',
                                         'text' => '期限超過'
