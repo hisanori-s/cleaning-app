@@ -26,3 +26,5 @@ dist-ssr
 #いつもの
 .workbench
 env.php
+.env.*
+!.env.example
